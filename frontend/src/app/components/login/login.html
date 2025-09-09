@@ -1,0 +1,51 @@
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+    <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px;">
+
+        <h2 class="text-center mb-4 text-dark fw-bold">
+            InvSys Login
+        </h2>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input id="email" type="email" class="form-control" formControlName="email"
+                    [ngClass]="{ 'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched }" />
+                <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                    class="invalid-feedback">
+                    Please enter a valid email address.
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input id="password" type="password" class="form-control" formControlName="password"
+                    [ngClass]="{ 'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched }" />
+                <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                    class="invalid-feedback">
+                    Password is required.
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">
+                    Sign In
+                </button>
+            </div>
+        </form>
+
+        <!-- Login Error -->
+        <div *ngIf="loginError" class="alert alert-danger mt-3 py-2" role="alert">
+            {{ loginError }}
+        </div>
+
+        <!-- Login Success -->
+        <div *ngIf="loginSuccess" class="alert alert-success mt-3 py-2" role="alert">
+            {{ loginSuccess }}
+        </div>
+
+    </div>
+</div>
