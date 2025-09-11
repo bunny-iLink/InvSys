@@ -23,6 +23,7 @@ namespace UserService.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.Email.Trim());
+            Console.WriteLine(user);
 
             if (user == null || !user.IsActive)
             {

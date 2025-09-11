@@ -46,15 +46,16 @@ builder.Services.AddSwaggerGen(c =>
 
 
 // Building connection string
-var ConnectionString = $"server={Environment.GetEnvironmentVariable("DB_HOST")};" +
-                       $"port={Environment.GetEnvironmentVariable("DB_PORT")};" +
-                       $"database={Environment.GetEnvironmentVariable("DB_NAME")};" +
-                       $"user={Environment.GetEnvironmentVariable("DB_USER")};" +
-                       $"password={Environment.GetEnvironmentVariable("DB_PASSWORD")};";
+var ConnectionString = $"Server={Environment.GetEnvironmentVariable("DB_HOST")},{Environment.GetEnvironmentVariable("DB_PORT")};" +
+                       $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                       $"User Id={Environment.GetEnvironmentVariable("DB_USER")};" +
+                       $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
+                       $"Trusted_Connection=False;Encrypt=False;";
 
 // Configure Entity Framework Core with MySQL
-builder.Services.AddDbContext<UserDbContext>(Options =>
-    Options.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString)));
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseSqlServer(ConnectionString)
+);
 
 // Get environment variables
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
