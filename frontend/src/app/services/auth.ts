@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { log } from 'console';
 
 @Injectable({
   providedIn: 'root'
@@ -14,5 +15,13 @@ export class Auth {
   login(email: string, password: string): Observable<any> {
     const body = { email, password };
     return this.http.post(`${this.apiUrl}/login`, body);
+  }
+
+  register(email: string): Observable<any> {
+    const body = { email };
+    const resp = this.http.post(`${this.apiUrl}/register`, body);
+    console.log("Register response:", resp);
+    
+    return resp;
   }
 }

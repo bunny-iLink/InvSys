@@ -5,6 +5,25 @@
     <h2 class="text-center mb-4 text-dark fw-bold">InvSys Register</h2>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <!-- First Name -->
+      <div class="mb-3">
+        <label for="firstname" class="form-label">First Name</label>
+        <input
+          id="firstname"
+          type="text"
+          class="form-control"
+          formControlName="firstname"
+          [ngClass]="{'is-invalid': registerForm.get('firstname')?.invalid && registerForm.get('firstname')?.touched}"
+        />
+
+        <div
+          *ngIf="registerForm.get('firstname')?.invalid && registerForm.get('firstname')?.touched"
+          class="invalid-feedback"
+        >
+          First name is required
+        </div>
+      </div>
+
       <!-- Email -->
       <div class="mb-3">
         <label for="email" class="form-label">Email Address</label>
@@ -20,6 +39,24 @@
           class="invalid-feedback"
         >
           Please enter a valid email address.
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input
+          id="password"
+          type="password"
+          class="form-control"
+          formControlName="password"
+          [ngClass]="{ 'is-invalid': registerForm.get('password')?.invalid && registerForm.get('password')?.touched }"
+        />
+        <div
+          *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+          class="invalid-feedback"
+        >
+          Password must be at least 6 characters long.
         </div>
       </div>
 

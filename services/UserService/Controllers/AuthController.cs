@@ -12,11 +12,13 @@ namespace UserService.Controllers
     {
         private readonly UserDbContext _context;
         private readonly ITokenService _tokenService;
+        private readonly IVerificationTokenService _verificationTokenService;
 
-        public AuthController(UserDbContext context, ITokenService tokenService)
+        public AuthController(UserDbContext context, ITokenService tokenService, IVerificationTokenService verificationTokenService)
         {
             _context = context;
             _tokenService = tokenService;
+            _verificationTokenService = verificationTokenService;
         }
 
         [HttpPost("login")]
@@ -40,6 +42,33 @@ namespace UserService.Controllers
             var token = _tokenService.GenerateToken(user);
 
             return Ok(new LoginResponse { Token = token });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
+        {
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerRequest.Email.Trim());
+
+            if (existingUser != null)
+            {
+                return BadRequest("Email is already registered.");
+            }
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password);
+            var newUser = new User
+            {
+                FirstName = registerRequest.FirstName,
+                Email = registerRequest.Email.Trim(),
+                Password = hashedPassword,
+                Role = "customer",
+                IsActive = true,
+                VerificationToken = _verificationTokenService.GenerateVerificationToken()
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            return Ok(new RegisterResponse { Message = "Registration successful." });
         }
     }
 }

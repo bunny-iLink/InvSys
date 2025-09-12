@@ -90,6 +90,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // Register services
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IVerificationTokenService, VerificationTokenService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

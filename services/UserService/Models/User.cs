@@ -13,6 +13,8 @@ namespace UserService.Models
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+        public string? VerificationToken { get; set; } = string.Empty;
+
     }
 }

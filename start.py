@@ -2,7 +2,6 @@ import subprocess
 import os
 import sys
 
-# Paths to your project folders
 FRONTEND_DIR = os.path.join(os.getcwd(), "frontend")
 GATEWAY_DIR = os.path.join(os.getcwd(), "gateway")
 SERVICES_DIR = os.path.join(os.getcwd(), "services")
