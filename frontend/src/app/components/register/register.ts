@@ -27,11 +27,11 @@ export class Register {
     if (this.registerForm.valid) {
       this.registerError = null;
       this.registerSuccess = null;
-      const { email, password } = this.registerForm.value;
-      console.log("Email:", email, "Password:", password);
+      const { firstname, email, password } = this.registerForm.value;
+      console.log("Email:", email, "Password:", password, "First Name:", firstname);
       
 
-      this.authService.register(email).subscribe({
+      this.authService.register(firstname, email, password).subscribe({
         next: (response: any) => {
           console.log('register successful', response);
           this.registerSuccess = `register successful!`;

@@ -17,8 +17,8 @@ export class Auth {
     return this.http.post(`${this.apiUrl}/login`, body);
   }
 
-  register(email: string): Observable<any> {
-    const body = { email };
+  register(firstname: string, email: string, password: string): Observable<any> {
+    const body = { firstname, email, password };
     const resp = this.http.post(`${this.apiUrl}/register`, body);
     console.log("Register response:", resp);
     

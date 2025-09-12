@@ -12,13 +12,13 @@ namespace UserService.Controllers
     {
         private readonly UserDbContext _context;
         private readonly ITokenService _tokenService;
-        private readonly IVerificationTokenService _verificationTokenService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(UserDbContext context, ITokenService tokenService, IVerificationTokenService verificationTokenService)
+        public AuthController(UserDbContext context, ITokenService tokenService, IEmailService emailService)
         {
             _context = context;
             _tokenService = tokenService;
-            _verificationTokenService = verificationTokenService;
+            _emailService = emailService;
         }
 
         [HttpPost("login")]
@@ -55,6 +55,7 @@ namespace UserService.Controllers
             }
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password);
+            var verificationToken = Guid.NewGuid().ToString();
             var newUser = new User
             {
                 FirstName = registerRequest.FirstName,
@@ -62,10 +63,11 @@ namespace UserService.Controllers
                 Password = hashedPassword,
                 Role = "customer",
                 IsActive = true,
-                VerificationToken = _verificationTokenService.GenerateVerificationToken()
+                VerificationToken = verificationToken
             };
 
             _context.Users.Add(newUser);
+            _emailService.SendVerificationEmail(newUser.Email, newUser.VerificationToken);
             await _context.SaveChangesAsync();
 
             return Ok(new RegisterResponse { Message = "Registration successful." });
