@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { log } from 'console';
 
 @Injectable({
   providedIn: 'root'
@@ -24,4 +23,11 @@ export class Auth {
     
     return resp;
   }
+
+  verifyAccount(email: string | null, token: string | null): Observable<any> {
+  const params = { email: email ?? '', token: token ?? '' };
+  console.log("Verification params:", params);
+  return this.http.get(`${this.apiUrl}/verify-email`, { params });
+}
+
 }

@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserService.Models
 {
+    /// <summary>
+    /// User entity model
+    /// </summary>
     [Table("TbUser")]
     public class User
     {
@@ -15,6 +18,8 @@ namespace UserService.Models
         public string Role { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string? VerificationToken { get; set; } = string.Empty;
+
+        public bool IsVerified { get; set; } = false;
 
     }
 }

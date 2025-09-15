@@ -15,5 +15,15 @@ export const routes: Routes = [
         path: 'register',
         title: 'Register | InvSys',
         loadComponent: () => import('./components/register/register').then(m => m.Register),
-    }
+    },
+    {
+        path: 'dashboard',
+        title: 'Dashboard | InvSys',
+        loadComponent: () => import('./components/dashboard/dashboard').then(m => m.Dashboard),
+    },
+    {
+        path: 'verify',
+        title: 'Verify Account | InvSys',
+        loadComponent: () => import('./components/verify/verify').then(m => m.Verify),
+    },
 ];

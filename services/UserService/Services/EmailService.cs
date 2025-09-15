@@ -23,7 +23,10 @@ namespace UserService.Services
                 var mail = new MailMessage(fromEmail, toEmail);
                 mail.Subject = "Verify your email";
                 mail.Body = $"Click this link to verify your account: {verificationLink}";
-                mail.IsBodyHtml = false;
+                mail.IsBodyHtml = true;
+                mail.Body = $"<p>Please verify your account by clicking the link below:</p>" +
+                            $"<a href='{verificationLink}'>Verify Email</a>";
+
 
                 client.Send(mail);
             }

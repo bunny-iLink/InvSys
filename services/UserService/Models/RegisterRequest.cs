@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace UserService.Models
 {
+    /// <summary>
+    /// Register request model
+    /// </summary>
     public class RegisterRequest
     {
         [Required]

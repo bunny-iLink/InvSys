@@ -34,7 +34,7 @@ export class Register {
       this.authService.register(firstname, email, password).subscribe({
         next: (response: any) => {
           console.log('register successful', response);
-          this.registerSuccess = `register successful!`;
+          this.registerSuccess = `Register successful. Please check your email (${email}) to verify your account.`;
         },
         error: (err) => {
           console.error('register failed', err);

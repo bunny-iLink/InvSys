@@ -12,7 +12,7 @@ try:
     # Start Angular frontend
     print("🚀 Starting Angular frontend...")
     processes.append(subprocess.Popen(
-        ["npm", "start"],
+        ["ng", "serve"],
         cwd=FRONTEND_DIR,
         shell=True
     ))
@@ -37,7 +37,14 @@ try:
                 shell=True
             ))
 
-    print("\n✅ All services started. Press Ctrl+C to stop.\n")
+    # Start ngrok tunnel
+    # print("🌐 Starting ngrok tunnel...")
+    # processes.append(subprocess.Popen(
+    #     ["ngrok", "http", "--domain=zoographical-unenchanted-kiera.ngrok-free.dev", "4200"],
+    #     shell=True
+    # ))
+
+    print("\n✅ All services started (including ngrok). Press Ctrl+C to stop.\n")
 
     # Keep script alive until interrupted
     for p in processes:

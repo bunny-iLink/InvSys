@@ -21,6 +21,11 @@ namespace UserService.Controllers
             _emailService = emailService;
         }
 
+        /// <summary>
+        /// Login endpoint. This will be called from the frontend to authenticate a user.
+        /// </summary>
+        /// <param name="loginRequest"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
@@ -44,6 +49,11 @@ namespace UserService.Controllers
             return Ok(new LoginResponse { Token = token });
         }
 
+        /// <summary>
+        /// Register endpoint. This will be called from the frontend to create a new user.
+        /// </summary>
+        /// <param name="registerRequest"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
@@ -72,5 +82,41 @@ namespace UserService.Controllers
 
             return Ok(new RegisterResponse { Message = "Registration successful." });
         }
+
+        /// <summary>
+        /// Verify Email endpoint. This will be called when the user clicks the verification link in their email.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] string email, [FromQuery] string token)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                return BadRequest(new RegisterResponse { Message = "error: Invalid verification link" });
+            }
+
+            if (user.VerificationToken != null && user.VerificationToken != token)
+            {
+                return BadRequest(new RegisterResponse { Message = "error: Invalid or expired verification link." });
+            }
+
+            if (user.IsVerified || user.VerificationToken == null)
+            {
+                return Ok(new RegisterResponse { Message = "info: User already verified" });
+            }
+
+            user.IsActive = true;
+            user.VerificationToken = null;
+            user.IsVerified = true;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new RegisterResponse { Message = "success: Email verified successfully." });
+        }
+
+
     }
 }

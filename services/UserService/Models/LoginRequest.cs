@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace UserService.Models
 {
+    /// <summary>
+    /// Login request model
+    /// </summary>
     public class LoginRequest
     {
         [Required]
