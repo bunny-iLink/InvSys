@@ -6,6 +6,11 @@ namespace UserService.Services
 {
     public class EmailService : IEmailService
     {
+        /// <summary>
+        /// Sends a verification email using Gmail's SMTP server.
+        /// </summary>
+        /// <param name="toEmail">The email of the receiver</param>
+        /// <param name="token">The GUID generated after registration. Will be used to verify the email</param>
         public void SendVerificationEmail(string toEmail, string token)
         {
             string fromEmail = "info.invsys12@gmail.com";    // your Gmail
@@ -13,7 +18,7 @@ namespace UserService.Services
             string smtpServer = "smtp.gmail.com";
             int smtpPort = 587;
 
-            string verificationLink = $"https://localhost:4200/verify?email={Uri.EscapeDataString(toEmail)}&token={token}";
+            string verificationLink = $"http://localhost:4200/verify?email={Uri.EscapeDataString(toEmail)}&token={token}";
 
             using (var client = new SmtpClient(smtpServer, smtpPort))
             {

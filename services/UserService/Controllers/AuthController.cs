@@ -87,7 +87,7 @@ namespace UserService.Controllers
         /// Verify Email endpoint. This will be called when the user clicks the verification link in their email.
         /// </summary>
         /// <param name="token"></param>
-        /// <returns></returns>
+        /// <returns>Returns a response message which will be displayed to user after clicking verification link received on email</returns>
         [HttpGet("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string email, [FromQuery] string token)
         {
