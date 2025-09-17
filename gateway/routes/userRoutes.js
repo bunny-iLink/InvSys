@@ -12,7 +12,7 @@ const userProxy = createProxyMiddleware({
     target: data.USER_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {
-        '^/api/users': '/user',
+        '^/api/users': '',
     },
     onError: (err, req, res) => {
         console.error('Proxy error:', err);

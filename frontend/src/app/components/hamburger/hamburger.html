@@ -8,14 +8,36 @@
     <!-- Logo / Title -->
     <div class="mb-4 text-center">
       <h4 class="fw-bold text-dark">InvSys</h4>
-    </div>
 
-    <!-- Navigation Buttons -->
-    <div class="d-flex flex-column">
-      <a class="btn menu-btn mb-2 text-start" href="/customer/dashboard"> Dashboard </a>
-      <a class="btn menu-btn mb-2 text-start" href="/products"> Products </a>
-      <a class="btn menu-btn mb-2 text-start" href="/orders"> My Orders </a>
-      <a class="btn menu-btn mb-2 text-start" href="/profile"> Profile </a>
+      <!-- Navigation Buttons -->
+      <div class="d-flex flex-column mt-4">
+        <button
+          class="btn menu-btn mb-2 text-start"
+          (click)="navigateTo('/customer/dashboard')"
+        >
+          Dashboard
+        </button>
+        <button
+          class="btn menu-btn mb-2 text-start"
+          (click)="navigateTo('/products')"
+          >Products</button
+        >
+        <button
+          class="btn menu-btn mb-2 text-start"
+          (click)="navigateTo('/orders')"
+          >My Orders</button
+        >
+        <button
+          class="btn menu-btn mb-2 text-start"
+          (click)="navigateTo('/admin/users')"
+          >Users</button
+        >
+        <button
+          class="btn menu-btn mb-2 text-start"
+          (click)="navigateTo('/profile')"
+          >Profile</button
+        >
+      </div>
     </div>
 
     <!-- Footer (User + Logout) -->

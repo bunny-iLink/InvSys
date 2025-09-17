@@ -47,7 +47,7 @@ export class Login {
       ).subscribe({
         next: (response: any) => {
           console.log('Login successful', response);
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/customer/dashboard']);
         },
         error: (err) => {
           this.loginError = 'Login failed. Please check your credentials and try again.';

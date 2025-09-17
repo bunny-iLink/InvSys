@@ -56,6 +56,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./components/dashboard/dashboard').then((m) => m.Dashboard),
       },
+      {
+        path: 'users',
+        title: "Users | InvSys",
+        loadComponent: () => import('./components/users/users').then(m => m.Users),
+      }
     ],
   },
   {

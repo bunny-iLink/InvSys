@@ -1,0 +1,154 @@
+<div class="d-flex justify-content-center align-items-center">
+  <div class="card shadow-sm p-4" style="width: 100%; max-width: 1000px">
+    <h2 class="text-center mb-4 text-dark fw-bold">User Management</h2>
+
+    <!-- Add User Button -->
+    <div class="d-flex justify-content-end mb-3">
+      <button class="btn btn-success" (click)="openModal()">+ Add User</button>
+    </div>
+
+    <!-- User Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle w-500">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Active</th>
+            <th>Verified</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ user.firstName }}</td>
+            <td>{{ user.lastName }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+              <span
+                class="badge bg-{{ user.isActive ? 'success' : 'danger' }}"
+              >
+                {{ user.isActive ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="badge bg-{{ user.isVerified ? 'success' : 'warning' }}"
+              >
+                {{ user.isVerified ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn btn-sm btn-primary me-2"
+                (click)="openModal(user)"
+              >
+                Edit
+              </button>
+              <button
+                class="btn btn-sm btn-danger"
+                (click)="deleteUser(user.userId)"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="users.length === 0">
+            <td colspan="8" class="text-center">No users found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="isModalOpen"
+  class="modal-backdrop fade show"
+  (click)="closeModal()"
+></div>
+
+<!-- User Modal -->
+<div
+  class="modal fade"
+  tabindex="-1"
+  [ngClass]="{ 'show d-block': isModalOpen }"
+>
+  <div class="modal-dialog modal-lg justify-content-center align-items-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="userForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">First Name</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="firstName"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Last Name</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="lastName"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="email"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                formControlName="password"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Role</label>
+              <select class="form-select" formControlName="role" aria-placeholder="Select Role">
+                <option value="admin">Admin</option>
+                <option value="customer">Customer</option>
+                <option value="employee">Employee</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Active</label>
+              <input
+                type="checkbox"
+                class="form-check-input ms-2"
+                formControlName="isActive"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button
+          class="btn btn-primary"
+          (click)="onSubmit()"
+          [disabled]="userForm.invalid"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
