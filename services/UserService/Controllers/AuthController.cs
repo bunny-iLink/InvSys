@@ -49,12 +49,13 @@ namespace UserService.Controllers
             return Ok(new LoginResponse
             {
                 Token = token,
-                UserId = user.UserId,       
-                FirstName = user.FirstName, 
-                LastName = user.LastName,  
-                Email = user.Email, 
+                UserId = user.UserId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
                 IsActive = user.IsActive,
-                IsVerified = user.IsVerified 
+                IsVerified = user.IsVerified,
+                Role = user.Role
             });
         }
 

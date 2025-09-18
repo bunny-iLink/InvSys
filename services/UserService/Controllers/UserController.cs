@@ -72,6 +72,9 @@ namespace UserService.Controllers
                 return Conflict("Email already exists.");
             }
 
+            // Hash the password using bcrypt
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
             // Add user to database
             _context.Users.Add(user);
             await _context.SaveChangesAsync();

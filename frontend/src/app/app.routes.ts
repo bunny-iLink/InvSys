@@ -29,19 +29,14 @@ export const routes: Routes = [
     path: 'profile',
     title: 'Profile | InvSys',
     component: Layout,
-    children: [{
-      path: "",
-      loadComponent: () => import('./components/profile/profile').then(m => m.Profile)
-    }],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/profile/profile').then((m) => m.Profile),
+      },
+    ],
   },
-  // {
-  //   path: 'products',
-  //   title: 'Products | InvSys',
-  //   component: Layout,
-  //   children: [{
-  //     loadChildren: () => import('./components/products/products').then(m => m.Products),
-  //   }]
-  // },
   {
     path: 'customer',
     component: Layout,
@@ -51,6 +46,12 @@ export const routes: Routes = [
         title: 'Dashboard | InvSys',
         loadComponent: () =>
           import('./components/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'products',
+        title: 'Products | InvSys',
+        loadComponent: () =>
+          import('./components/products/products').then((m) => m.Products),
       },
     ],
   },
@@ -66,9 +67,16 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        title: "Users | InvSys",
-        loadComponent: () => import('./components/users/users').then(m => m.Users),
-      }
+        title: 'Users | InvSys',
+        loadComponent: () =>
+          import('./components/users/users').then((m) => m.Users),
+      },
+      {
+        path: 'products',
+        title: 'Products | InvSys',
+        loadComponent: () =>
+          import('./components/products/products').then((m) => m.Products),
+      },
     ],
   },
   {
@@ -80,6 +88,12 @@ export const routes: Routes = [
         title: 'Dashboard | InvSys',
         loadComponent: () =>
           import('./components/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'products',
+        title: 'Products | InvSys',
+        loadComponent: () =>
+          import('./components/products/products').then((m) => m.Products),
       },
     ],
   },

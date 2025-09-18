@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Confirm } from '../confirm/confirm';
 import { User } from '../../models/User';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-hamburger',
@@ -15,7 +16,7 @@ export class Hamburger {
   showConfirm: boolean = false;
   user: User | any = {};
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: Auth) {}
 
   ngOnInit(): void {
     if (typeof window !== 'undefined') {
@@ -30,6 +31,7 @@ export class Hamburger {
 
   onConfirmLogout() {
     this.showConfirm = false;
+    this.auth.logout();
     this.router.navigate(['/login']);
   }
 

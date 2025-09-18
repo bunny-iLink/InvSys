@@ -27,6 +27,7 @@ export class Auth {
             isActive: response.isActive,
             isVerified: response.isVerified,
             email: response.email,
+            role: response.role,
           })
         );
       })
@@ -49,5 +50,10 @@ export class Auth {
     const params = { email: email ?? '', token: token ?? '' };
     console.log('Verification params:', params);
     return this.http.get(`${this.apiUrl}/verify-email`, { params });
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 }

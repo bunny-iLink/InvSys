@@ -17,25 +17,25 @@
     <div class="d-flex flex-column mt-4">
       <button
         class="btn menu-btn mb-2 text-start"
-        (click)="navigateTo('/customer/dashboard')"
+        (click)="navigateTo(`${user.role}/dashboard`)"
       >
         Dashboard
       </button>
       <button
         class="btn menu-btn mb-2 text-start"
-        (click)="navigateTo('/products')"
+        (click)="navigateTo(`${user.role}/products`)"
       >
         Products
       </button>
       <button
         class="btn menu-btn mb-2 text-start"
-        (click)="navigateTo('/orders')"
+        (click)="navigateTo(`${user.role}/orders`)"
       >
         My Orders
       </button>
       <button
         class="btn menu-btn mb-2 text-start"
-        (click)="navigateTo('/admin/users')"
+        (click)="navigateTo(`${user.role}/users`)"
       >
         Users
       </button>

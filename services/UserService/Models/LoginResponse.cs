@@ -8,4 +8,5 @@ public class LoginResponse
     public string? LastName { get; set; }
     public bool IsActive { get; set; }
     public bool IsVerified { get; set; }
+    public string Role { get; set; } = string.Empty;
 }
