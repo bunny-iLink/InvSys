@@ -4,6 +4,7 @@ import { User } from '../../models/User';
 import { User as UserService } from '../../services/user';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CustomToastService } from '../../services/toastr';
 
 @Component({
   selector: 'app-users',
@@ -17,7 +18,11 @@ export class Users implements OnInit {
   modalTitle: string = 'Add User';
   isModalOpen: boolean = false;
 
-  constructor(private fb: FormBuilder, private userService: UserService) {}
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService,
+    private toast: CustomToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -34,9 +39,19 @@ export class Users implements OnInit {
   }
 
   loadUsers() {
-    this.userService.getAllUsers().subscribe((data: User[]) => {
-      this.users = data;
-      console.log(data);
+    this.userService.getAllUsers().subscribe({
+      next: (data: User[]) => {
+        this.users = data;
+        // this.toast.showToast(
+        //   'Success',
+        //   'Users fetched successfully',
+        //   'success',
+        //   3000
+        // );
+      },
+      error: (err) => {
+        this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
+      },
     });
   }
 
@@ -77,24 +92,56 @@ export class Users implements OnInit {
     console.log('Payload to backend:', payload);
 
     if (this.selectedUser) {
-      this.userService
-        .updateUser(this.selectedUser.userId, payload)
-        .subscribe(() => {
+      this.userService.updateUser(this.selectedUser.userId, payload).subscribe({
+        next: () => {
+          this.toast.showToast(
+            'Success',
+            'User updated successfully',
+            'success',
+            3000
+          );
           this.loadUsers();
           this.closeModal();
-        });
+        },
+        error: (err) => {
+          this.toast.showToast('Error', 'Failed to update user', 'error', 3000);
+        },
+      });
     } else {
-      this.userService.addUser(payload).subscribe(() => {
-        this.loadUsers();
-        this.closeModal();
+      this.userService.addUser(payload).subscribe({
+        next: () => {
+          this.toast.showToast(
+            'Success',
+            'User added successfully',
+            'success',
+            3000
+          );
+          this.loadUsers();
+          this.closeModal();
+        },
+        error: (err) => {
+          this.toast.showToast('Error', 'Failed to add user', 'error', 3000);
+        },
       });
     }
   }
 
   deleteUser(userId: number) {
     if (confirm('Are you sure you want to delete this user?')) {
-      this.userService.deleteUser(userId).subscribe(() => {
-        this.loadUsers();
+      this.userService.deleteUser(userId).subscribe({
+        next: () => {
+          this.loadUsers();
+          this.toast.showToast(
+            'Success',
+            'User deleted successfully',
+            'success',
+            3000
+          );
+        },
+        error: (err) => {
+          console.error(`Error deleting user with ID ${userId}:`, err);
+          this.toast.showToast('Error', 'Failed to delete user', 'error', 3000);
+        },
       });
     }
   }

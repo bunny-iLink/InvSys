@@ -1,3 +1,10 @@
+<app-confirm
+  [message]="confirmMessage"
+  [show]="showConfirm"
+  (confirmed)="onConfirmLogout()"
+  (cancelled)="onCancelLogout()"
+></app-confirm>
+
 <!-- Sidebar / Hamburger Menu -->
 <div class="d-flex">
   <!-- Sidebar -->
@@ -20,23 +27,27 @@
         <button
           class="btn menu-btn mb-2 text-start"
           (click)="navigateTo('/products')"
-          >Products</button
         >
+          Products
+        </button>
         <button
           class="btn menu-btn mb-2 text-start"
           (click)="navigateTo('/orders')"
-          >My Orders</button
         >
+          My Orders
+        </button>
         <button
           class="btn menu-btn mb-2 text-start"
           (click)="navigateTo('/admin/users')"
-          >Users</button
         >
+          Users
+        </button>
         <button
           class="btn menu-btn mb-2 text-start"
           (click)="navigateTo('/profile')"
-          >Profile</button
         >
+          Profile
+        </button>
       </div>
     </div>
 
@@ -51,7 +62,9 @@
         </div>
         <div>
           <p class="mb-0 fw-semibold">Customer</p>
-          <a href="/logout" class="text-primary">Log Out</a>
+          <button (click)="logout()" class="btn btn-link text-primary p-0">
+            Log Out
+          </button>
         </div>
       </div>
     </div>

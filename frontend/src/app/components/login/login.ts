@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { Auth } from '../../services/auth';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import  {CustomToastService} from '../../services/toastr';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,8 @@ export class Login {
   constructor(
     private fb: FormBuilder,
     private authService: Auth,
-    private router: Router
+    private router: Router,
+    private toast: CustomToastService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -39,7 +41,6 @@ export class Login {
       this.loginError = null;
       this.loginSuccess = null;
       const { email, password } = this.loginForm.value;
-      console.log('Email:', email, 'Password:', password);
       this.isLoading = true;
 
       this.authService.login(email, password).pipe(
@@ -47,10 +48,11 @@ export class Login {
       ).subscribe({
         next: (response: any) => {
           console.log('Login successful', response);
+          this.toast.showToast('Success', 'Login Successful. Welcome back!', "success", 3000);
           this.router.navigate(['/customer/dashboard']);
         },
         error: (err) => {
-          this.loginError = 'Login failed. Please check your credentials and try again.';
+          this.toast.showToast('Error', 'Login Failed. Please check your credentials and try again.', "error", 3000);
           console.error('Login failed', err);
         },
       });

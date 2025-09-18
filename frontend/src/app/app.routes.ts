@@ -34,6 +34,14 @@ export const routes: Routes = [
       loadComponent: () => import('./components/profile/profile').then(m => m.Profile)
     }],
   },
+  // {
+  //   path: 'products',
+  //   title: 'Products | InvSys',
+  //   component: Layout,
+  //   children: [{
+  //     loadChildren: () => import('./components/products/products').then(m => m.Products),
+  //   }]
+  // },
   {
     path: 'customer',
     component: Layout,

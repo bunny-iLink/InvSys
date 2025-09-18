@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { Auth } from '../../services/auth';
 import { finalize } from 'rxjs';
+import { CustomToastService } from '../../services/toastr';
 
 @Component({
   selector: 'app-register',
@@ -13,11 +14,9 @@ import { finalize } from 'rxjs';
 })
 export class Register {
   registerForm: FormGroup;
-  registerError: string | null = null;
-  registerSuccess: string | null = null;
   isLoading: boolean = false;
 
-  constructor(private fb: FormBuilder, private authService: Auth) {
+  constructor(private fb: FormBuilder, private authService: Auth, private toast: CustomToastService) {
     this.registerForm = this.fb.group({
       firstname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -27,22 +26,17 @@ export class Register {
 
   onSubmit() {
     if (this.registerForm.valid) {
-      this.registerError = null;
-      this.registerSuccess = null;
       const { firstname, email, password } = this.registerForm.value;
-      console.log("Email:", email, "Password:", password, "First Name:", firstname);
       this.isLoading = true;
 
       this.authService.register(firstname, email, password).pipe(
         finalize(() => this.isLoading = false)
       ).subscribe({
         next: (response: any) => {
-          console.log('register successful', response);
-          this.registerSuccess = `Register successful. Please check your email (${email}) to verify your account.`;
+          this.toast.showToast('Success', 'Registration Successful. Please check your email to verify your account.', "success", 3000);
         },
         error: (err) => {
-          console.error('register failed', err);
-          this.registerError = 'register failed. Please check your credentials and try again.';
+          this.toast.showToast('Error', 'Register Failed. Please try again', "error", 3000);
         }
       });
     }
