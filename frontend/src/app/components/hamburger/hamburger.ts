@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Confirm } from '../confirm/confirm';
+import { User } from '../../models/User';
 
 @Component({
   selector: 'app-hamburger',
@@ -12,8 +13,15 @@ import { Confirm } from '../confirm/confirm';
 export class Hamburger {
   confirmMessage: string = '';
   showConfirm: boolean = false;
+  user: User | any = {};
 
   constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    if (typeof window !== 'undefined') {
+      this.user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
+  }
 
   logout() {
     this.confirmMessage = 'Are you sure you want to logout?';

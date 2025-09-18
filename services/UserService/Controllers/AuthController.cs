@@ -46,8 +46,18 @@ namespace UserService.Controllers
 
             var token = _tokenService.GenerateToken(user);
 
-            return Ok(new LoginResponse { Token = token });
+            return Ok(new LoginResponse
+            {
+                Token = token,
+                UserId = user.UserId,       
+                FirstName = user.FirstName, 
+                LastName = user.LastName,  
+                Email = user.Email, 
+                IsActive = user.IsActive,
+                IsVerified = user.IsVerified 
+            });
         }
+
 
         /// <summary>
         /// Register endpoint. This will be called from the frontend to create a new user.

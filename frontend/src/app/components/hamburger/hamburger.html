@@ -5,67 +5,64 @@
   (cancelled)="onCancelLogout()"
 ></app-confirm>
 
-<!-- Sidebar / Hamburger Menu -->
-<div class="d-flex">
-  <!-- Sidebar -->
-  <div
-    class="bg-light shadow-sm d-flex flex-column justify-content-between p-3"
-    style="width: 250px; min-height: 100vh"
-  >
-    <!-- Logo / Title -->
-    <div class="mb-4 text-center">
-      <h4 class="fw-bold text-dark">InvSys</h4>
+<div
+  class="bg-light shadow-sm d-flex flex-column justify-content-between p-3"
+  style="width: 250px; min-height: 100vh"
+>
+  <!-- Logo / Title -->
+  <div class="mb-4 text-center">
+    <h4 class="fw-bold text-dark">InvSys</h4>
 
-      <!-- Navigation Buttons -->
-      <div class="d-flex flex-column mt-4">
-        <button
-          class="btn menu-btn mb-2 text-start"
-          (click)="navigateTo('/customer/dashboard')"
-        >
-          Dashboard
-        </button>
-        <button
-          class="btn menu-btn mb-2 text-start"
-          (click)="navigateTo('/products')"
-        >
-          Products
-        </button>
-        <button
-          class="btn menu-btn mb-2 text-start"
-          (click)="navigateTo('/orders')"
-        >
-          My Orders
-        </button>
-        <button
-          class="btn menu-btn mb-2 text-start"
-          (click)="navigateTo('/admin/users')"
-        >
-          Users
-        </button>
-        <button
-          class="btn menu-btn mb-2 text-start"
-          (click)="navigateTo('/profile')"
-        >
-          Profile
-        </button>
-      </div>
+    <!-- Navigation Buttons -->
+    <div class="d-flex flex-column mt-4">
+      <button
+        class="btn menu-btn mb-2 text-start"
+        (click)="navigateTo('/customer/dashboard')"
+      >
+        Dashboard
+      </button>
+      <button
+        class="btn menu-btn mb-2 text-start"
+        (click)="navigateTo('/products')"
+      >
+        Products
+      </button>
+      <button
+        class="btn menu-btn mb-2 text-start"
+        (click)="navigateTo('/orders')"
+      >
+        My Orders
+      </button>
+      <button
+        class="btn menu-btn mb-2 text-start"
+        (click)="navigateTo('/admin/users')"
+      >
+        Users
+      </button>
     </div>
+  </div>
 
-    <!-- Footer (User + Logout) -->
-    <div class="mt-4 border-top pt-3">
-      <div class="d-flex align-items-center">
-        <div
-          class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
-          style="width: 35px; height: 35px"
+  <!-- Footer (User + Logout) -->
+  <div class="mt-4 border-top pt-3">
+    <div class="d-flex align-items-center">
+      <div
+        class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
+        style="width: 35px; height: 35px"
+      >
+        C
+      </div>
+      <div>
+        <a
+          class="d-block fw-bold text-dark text-decoration-none"
+          (click)="navigateTo('/profile')"
+          style="cursor: pointer"
         >
-          C
-        </div>
-        <div>
-          <p class="mb-0 fw-semibold">Customer</p>
-          <button (click)="logout()" class="btn btn-link text-primary p-0">
-            Log Out
-          </button>
-        </div>
+          {{user.firstName}} {{user.lastName}}
+        </a>
+
+        <button (click)="logout()" class="btn btn-link text-primary p-0">
+          Log Out
+        </button>
       </div>
     </div>
   </div>

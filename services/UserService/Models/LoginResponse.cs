@@ -1,8 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 public class LoginResponse
 {
-    /// <summary>
-    /// JWT Token, sent as response to a successful login
-    /// </summary>
-    public string Token { get; set; } = string.Empty;
+    public string? Token { get; set; }
+    public int UserId { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string? LastName { get; set; }
+    public bool IsActive { get; set; }
+    public bool IsVerified { get; set; }
 }

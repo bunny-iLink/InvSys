@@ -11,5 +11,9 @@ namespace ProductService.Models
         [Required]
         public string CategoryName { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
+        public int LastUpdatedBy { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime LastUpdatedOn { get; set; }
     }
 }

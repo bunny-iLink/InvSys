@@ -1,15 +1,14 @@
-<div class="d-flex justify-content-center align-items-center">
-  <div class="card shadow-sm p-4" style="width: 100%; max-width: 1000px">
-    <h2 class="text-center mb-4 text-dark fw-bold">User Management</h2>
+<div class="p-4">
+  <!-- Header Row -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="fw-bold text-dark mb-0">User Management</h2>
+    <button class="btn btn-success" (click)="openModal()">+ Add User</button>
+  </div>
 
-    <!-- Add User Button -->
-    <div class="d-flex justify-content-end mb-3">
-      <button class="btn btn-success" (click)="openModal()">+ Add User</button>
-    </div>
-
-    <!-- User Table -->
+  <!-- User Table -->
+  <div class="card shadow-sm p-4">
     <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle w-500">
+      <table class="table table-bordered table-hover align-middle">
         <thead class="table-light">
           <tr>
             <th>#</th>
@@ -30,9 +29,7 @@
             <td>{{ user.email }}</td>
             <td>{{ user.role }}</td>
             <td>
-              <span
-                class="badge bg-{{ user.isActive ? 'success' : 'danger' }}"
-              >
+              <span class="badge bg-{{ user.isActive ? 'success' : 'danger' }}">
                 {{ user.isActive ? 'Yes' : 'No' }}
               </span>
             </td>
@@ -122,7 +119,11 @@
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Role</label>
-              <select class="form-select" formControlName="role" aria-placeholder="Select Role">
+              <select
+                class="form-select"
+                formControlName="role"
+                aria-placeholder="Select Role"
+              >
                 <option value="admin">Admin</option>
                 <option value="customer">Customer</option>
                 <option value="employee">Employee</option>

@@ -11,5 +11,6 @@ const data = {
 
 console.log('PORT:', data.PORT);
 console.log('USER_SERVICE_URL:', data.USER_SERVICE_URL);
+console.log('PRODUCT_SERVICE_URL:', data.PRODUCT_SERVICE_URL);
 
 export default data;
