@@ -6,28 +6,37 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CustomToastService } from '../../services/toastr';
 import { User } from '../../models/User';
+import { User as UserService } from '../../services/user';
+import { Confirm } from '../confirm/confirm';
 
 @Component({
   selector: 'app-categories',
   templateUrl: './categories.html',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, Confirm],
 })
-export class Users implements OnInit {
+export class Categories implements OnInit {
   categories: Category[] = [];
   categoryForm!: FormGroup;
   selectedCategory: Category | null = null;
   modalTitle: string = 'Add Category';
   isModalOpen: boolean = false;
   user: User | null = null;
+  users: any[] = [];
+  userMap: { [key: number]: string } = {};
+  confirmMessage = '';
+  showConfirm = false;
+  selectedCategoryDelete: number = 0;
 
   constructor(
     private fb: FormBuilder,
     private categoryService: CategoryService,
+    private userService: UserService,
     private toast: CustomToastService
   ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadUsers();
 
     if (typeof window !== 'undefined') {
       this.user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -36,6 +45,22 @@ export class Users implements OnInit {
     this.categoryForm = this.fb.group({
       categoryName: ['', Validators.required],
       isActive: [true],
+    });
+  }
+
+  loadUsers() {
+    this.userService.getAllUsers().subscribe({
+      next: (data) => {
+        this.users = data;
+        // build lookup map for fast access
+        this.userMap = this.users.reduce((acc: any, user: any) => {
+          acc[user.userId] = `${user.firstName} ${user.lastName}`;
+          return acc;
+        }, {});
+      },
+      error: () => {
+        this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
+      },
     });
   }
 
@@ -153,27 +178,45 @@ export class Users implements OnInit {
     }
   }
 
-  deleteUser(categoryId: number) {
-    if (confirm('Are you sure you want to delete this user?')) {
-      this.categoryService.deleteCategory(categoryId).subscribe({
-        next: () => {
-          this.loadCategories();
-          this.toast.showToast(
-            'Success',
-            'Category deleted successfully',
-            'success',
-            3000
-          );
-        },
-        error: (err) => {
-          this.toast.showToast(
-            'Error',
-            'Failed to delete category',
-            'error',
-            3000
-          );
-        },
-      });
-    }
+  deleteCategory(categoryId: number) {
+    this.selectedCategoryDelete = categoryId;
+    this.confirmMessage = 'Are you sure to delete this category?';
+    this.showConfirm = true;
+  }
+
+  onDeleteCategory() {
+    if (!this.selectedCategoryDelete) return;
+
+    this.categoryService.deleteCategory(this.selectedCategoryDelete).subscribe({
+      next: () => {
+        this.loadCategories();
+        this.toast.showToast(
+          'Success',
+          'Category deleted successfully',
+          'success',
+          3000
+        );
+        this.resetConfirm();
+      },
+      error: () => {
+        this.toast.showToast(
+          'Error',
+          'Failed to delete category',
+          'error',
+          3000
+        );
+        this.resetConfirm();
+      },
+    });
+  }
+
+  onCancelDelete() {
+    this.resetConfirm();
+  }
+
+  private resetConfirm() {
+    this.showConfirm = false;
+    this.selectedCategoryDelete = 0;
+    this.confirmMessage = '';
   }
 }

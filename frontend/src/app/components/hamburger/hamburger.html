@@ -25,6 +25,7 @@
       <!-- Parent Button -->
       <button
         class="btn btn-outline-dark menu-btn mb-2 text-start w-100"
+        *ngIf="user.role === 'admin' || user.role === 'employee'"
         (click)="toggleProductsDropdown()"
       >
         Products & Categories
@@ -48,12 +49,30 @@
 
       <button
         class="btn menu-btn mb-2 text-start"
+        *ngIf="user.role === 'customer'"
+        (click)="navigateTo(`${user.role}/products`)"
+      >Products
+      </button>
+
+      <button
+        class="btn menu-btn mb-2 text-start"
+        *ngIf="user.role === 'customer'"
         (click)="navigateTo(`${user.role}/orders`)"
       >
         My Orders
       </button>
+
       <button
         class="btn menu-btn mb-2 text-start"
+        *ngIf="user.role === 'admin' || user.role === 'employee'"
+        (click)="navigateTo(`${user.role}/orders`)"
+      >
+        Orders
+      </button>
+
+      <button
+        class="btn menu-btn mb-2 text-start"
+        *ngIf="user.role === 'admin'"
         (click)="navigateTo(`${user.role}/users`)"
       >
         Users

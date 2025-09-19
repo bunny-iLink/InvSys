@@ -1,6 +1,6 @@
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-  <div class="card shadow-sm p-4" style="width: 100%; max-width: 500px">
-    <h2 class="text-center mb-4 text-dark fw-bold">My Profile</h2>
+<div class="d-flex justify-content-start align-items-start min-vh-100">
+  <div class="card shadow-sm p-4" style="width: 100%; max-width: 800px">
+    <h2 class="text-start mb-4 text-dark fw-bold">My Profile</h2>
 
     <form [formGroup]="profileForm" (ngSubmit)="onUpdate()">
       <!-- First Name -->
@@ -10,7 +10,7 @@
           id="firstname"
           type="text"
           class="form-control"
-          formControlName="firstname"
+          formControlName="firstName"
           [readonly]="!isEditing"
           [ngClass]="{'is-invalid': profileForm.get('firstname')?.invalid && profileForm.get('firstname')?.touched}"
         />
@@ -29,7 +29,7 @@
           id="lastname"
           type="text"
           class="form-control"
-          formControlName="lastname"
+          formControlName="lastName"
           [readonly]="!isEditing"
           [ngClass]="{'is-invalid': profileForm.get('lastname')?.invalid && profileForm.get('lastname')?.touched}"
         />
@@ -81,7 +81,6 @@
 
       <!-- Buttons -->
       <div class="d-flex justify-content-between mt-4">
-        <!-- Edit Button -->
         <button
           type="button"
           class="btn btn-warning"
@@ -91,7 +90,6 @@
           Edit Profile
         </button>
 
-        <!-- Save Changes Button -->
         <button
           type="submit"
           class="btn btn-primary"
@@ -101,25 +99,21 @@
           Save Changes
         </button>
 
-        <!-- Delete Button -->
         <button type="button" class="btn btn-danger" (click)="onDelete()">
           Delete Profile
         </button>
       </div>
     </form>
 
-    <!-- Profile Error -->
-    <div *ngIf="profileError" class="alert alert-danger mt-3 py-2" role="alert">
-      <!-- {{ profileError }} -->
-    </div>
-
-    <!-- Profile Success -->
+    <div
+      *ngIf="profileError"
+      class="alert alert-danger mt-3 py-2"
+      role="alert"
+    ></div>
     <div
       *ngIf="profileSuccess"
       class="alert alert-success mt-3 py-2"
       role="alert"
-    >
-      <!-- {{ profileSuccess }} -->
-    </div>
+    ></div>
   </div>
 </div>

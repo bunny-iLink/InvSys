@@ -80,8 +80,7 @@ export const routes: Routes = [
       {
         path: 'categories',
         title: 'Categories | InvSys',
-        loadComponent: () =>
-          import('./components/categories/categories').then((m) => m.Users),
+        loadComponent: () => import('./components/categories/categories').then((m) => m.Categories)
       }
     ],
   },

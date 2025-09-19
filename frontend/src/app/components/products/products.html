@@ -1,8 +1,29 @@
+<app-confirm
+  [message]="confirmMessage"
+  [show]="showConfirm"
+  (confirmed)="onConfirmDelete()"
+  (cancelled)="onCancelDelete()"
+></app-confirm>
+
 <div class="p-4">
   <!-- Header Row -->
   <div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="fw-bold text-dark mb-0">Product Management</h2>
-    <button class="btn btn-success" (click)="openModal()">+ Add Product</button>
+    <h2
+      *ngIf="user?.role === 'admin' || user?.role === 'employee'"
+      class="fw-bold text-dark mb-0"
+    >
+      Product Management
+    </h2>
+    <h2 *ngIf="user?.role === 'customer'" class="fw-bold text-dark mb-0">
+      Products
+    </h2>
+    <button
+      *ngIf="user?.role === 'admin' || user?.role === 'employee'"
+      class="btn btn-success"
+      (click)="openModal()"
+    >
+      + Add Product
+    </button>
   </div>
 
   <!-- product Table -->
@@ -14,44 +35,67 @@
             <th>#</th>
             <th>Product Name</th>
             <th>Category</th>
-            <th>Price</th>
+            <th>Price (in INR)</th>
             <th>Stock Available</th>
-            <th>SKU</th>
+            <th *ngIf="user?.role === 'admin' || user?.role === 'employee'">
+              SKU
+            </th>
             <th>Manufacturer</th>
             <th>Mfg. On</th>
             <th>Expiry Date</th>
-            <th>Is Active</th>
+            <th *ngIf="user?.role === 'admin' || user?.role === 'employee'">
+              Is Active
+            </th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let product of products; let i = index">
+          <tr *ngFor="let product of products; let i = index;">
             <td>{{ i + 1 }}</td>
             <td>{{ product.productName }}</td>
             <td>{{ product.categoryName }}</td>
             <td>{{ product.price }}</td>
             <td>{{ product.quantity }}</td>
-            <td>{{ product.sku}} </td>
-            <td>{{ product.manufacturer}} </td>
-            <td>{{ product.mfgOn}} </td>
-            <td>{{ product.expiryDate}} </td>
-            <td>
-              <span class="badge bg-{{ product.isActive ? 'success' : 'danger' }}">
+            <td *ngIf="user?.role === 'admin' || user?.role === 'employee'">
+              {{ product.sku}}
+            </td>
+            <td>{{ product.manufacturer}}</td>
+            <td>{{ product.mfgOn}}</td>
+            <td>{{ product.expiryDate}}</td>
+            <td *ngIf="user?.role === 'admin' || user?.role === 'employee'">
+              <span
+                class="badge bg-{{ product.isActive ? 'success' : 'danger' }}"
+              >
                 {{ product.isActive ? 'Yes' : 'No' }}
               </span>
             </td>
             <td>
               <button
+                *ngIf="user?.role === 'admin' || user?.role === 'employee'"
                 class="btn btn-sm btn-primary me-2"
                 (click)="openModal(product)"
               >
                 Edit
               </button>
               <button
+                *ngIf="user?.role === 'admin' || user?.role === 'employee'"
                 class="btn btn-sm btn-danger"
                 (click)="deleteProduct(product.productId)"
               >
                 Delete
               </button>
+              <button
+                *ngIf="user?.role === 'customer' && product.isActive; else outOfStock"
+                class="btn btn-sm btn-primary"
+              >
+                Place Order
+              </button>
+
+              <ng-template #outOfStock>
+                <button *ngIf="user?.role === 'customer'" class="btn btn-sm btn-danger" disabled>
+                  Unavailable
+                </button>
+              </ng-template>
             </td>
           </tr>
           <tr *ngIf="products.length === 0">
@@ -92,14 +136,21 @@
                 formControlName="productName"
               />
             </div>
+            <!-- Category -->
             <div class="col-md-6 mb-3">
               <label class="form-label">Category</label>
-              <input
-                type="text"
-                class="form-control"
-                formControlName="categoryName"
-              />
+              <select
+                class="form-select"
+                (change)="onCategoryChange($event)"
+                [value]="productForm.value.categoryId"
+              >
+                <option value="" default selected>Select Category</option>
+                <option *ngFor="let cat of categories" [value]="cat.categoryId">
+                  {{ cat.categoryName }}
+                </option>
+              </select>
             </div>
+
             <div class="col-md-6 mb-3">
               <label class="form-label">Price</label>
               <input
@@ -125,12 +176,12 @@
               />
             </div>
             <div class="col-md-6 mb-3">
+              <label class="form-label">SKU</label>
+              <input type="text" class="form-control" formControlName="sku" />
+            </div>
+            <div class="col-md-6 mb-3">
               <label class="form-label">Manufactured On</label>
-              <input
-                type="date"
-                class="form-control"
-                formControlName="mfgOn"
-              />
+              <input type="date" class="form-control" formControlName="mfgOn" />
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Expiry Date</label>

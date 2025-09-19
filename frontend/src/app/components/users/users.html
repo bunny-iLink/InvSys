@@ -1,3 +1,10 @@
+<app-confirm
+  [message]="confirmMessage"
+  [show]="showConfirm"
+  (confirmed)="onDeleteUser()"
+  (cancelled)="onCancelDelete()"
+></app-confirm>
+
 <div class="p-4">
   <!-- Header Row -->
   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -124,6 +131,7 @@
                 formControlName="role"
                 aria-placeholder="Select Role"
               >
+                <option value="" selected>Select Category</option>
                 <option value="admin">Admin</option>
                 <option value="customer">Customer</option>
                 <option value="employee">Employee</option>

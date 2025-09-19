@@ -1,3 +1,10 @@
+<app-confirm
+  [message]="confirmMessage"
+  [show]="showConfirm"
+  (confirmed)="onDeleteCategory()"
+  (cancelled)="onCancelDelete()"
+></app-confirm>
+
 <div class="p-4">
   <!-- Header Row -->
   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -18,6 +25,7 @@
             <th>Active</th>
             <th>Created By</th>
             <th>Last Updated By</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -25,12 +33,20 @@
             <td>{{ i + 1 }}</td>
             <td>{{ category.categoryName }}</td>
             <td>
-              <span class="badge bg-{{ category.isActive ? 'success' : 'danger' }}">
+              <span
+                class="badge bg-{{ category.isActive ? 'success' : 'danger' }}"
+              >
                 {{ category.isActive ? 'Yes' : 'No' }}
               </span>
             </td>
-            <td>{{ category.createdBy }}</td>
-            <td>{{ category.lastUpdatedBy }}</td>
+            <td>
+              {{ category.createdBy ? userMap[category.createdBy] : 'Unknown' }}
+            </td>
+            <td>
+              {{ category.lastUpdatedBy ? userMap[category.lastUpdatedBy] :
+              'Unknown' }}
+            </td>
+
             <td>
               <button
                 class="btn btn-sm btn-primary me-2"
@@ -40,7 +56,7 @@
               </button>
               <button
                 class="btn btn-sm btn-danger"
-                (click)="deleteUser(category.categoryId)"
+                (click)="deleteCategory(category.categoryId)"
               >
                 Delete
               </button>

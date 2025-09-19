@@ -5,11 +5,12 @@ import { User as UserService } from '../../services/user';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CustomToastService } from '../../services/toastr';
+import { Confirm } from '../confirm/confirm';
 
 @Component({
   selector: 'app-users',
   templateUrl: './users.html',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, Confirm],
 })
 export class Users implements OnInit {
   users: User[] = [];
@@ -17,6 +18,9 @@ export class Users implements OnInit {
   selectedUser: User | null = null;
   modalTitle: string = 'Add User';
   isModalOpen: boolean = false;
+  showConfirm = false;
+  confirmMessage = '';
+  selectedDeleteUser = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -41,7 +45,7 @@ export class Users implements OnInit {
   loadUsers() {
     this.userService.getAllUsers().subscribe({
       next: (data: User[]) => {
-        this.users = data;
+        this.users = data.map((user) => ({ ...user, password: '' }));
         // this.toast.showToast(
         //   'Success',
         //   'Users fetched successfully',
@@ -127,22 +131,37 @@ export class Users implements OnInit {
   }
 
   deleteUser(userId: number) {
-    if (confirm('Are you sure you want to delete this user?')) {
-      this.userService.deleteUser(userId).subscribe({
-        next: () => {
-          this.loadUsers();
-          this.toast.showToast(
-            'Success',
-            'User deleted successfully',
-            'success',
-            3000
-          );
-        },
-        error: (err) => {
-          console.error(`Error deleting user with ID ${userId}:`, err);
-          this.toast.showToast('Error', 'Failed to delete user', 'error', 3000);
-        },
-      });
-    }
+    this.selectedDeleteUser = userId;
+    this.confirmMessage = 'Are you sure to delete the user?';
+    this.showConfirm = true;
+  }
+
+  onDeleteUser() {
+    this.userService.deleteUser(this.selectedDeleteUser).subscribe({
+      next: () => {
+        this.loadUsers();
+        this.toast.showToast(
+          'Success',
+          'User deleted successfully',
+          'success',
+          3000
+        );
+        this.resetConfirm();
+      },
+      error: (err) => {
+        this.toast.showToast('Error', 'Failed to delete user', 'error', 3000);
+        this.resetConfirm();
+      },
+    });
+  }
+
+  onCancelDelete() {
+    this.resetConfirm();
+  }
+
+  private resetConfirm() {
+    this.showConfirm = false;
+    this.selectedDeleteUser = 0;
+    this.confirmMessage = '';
   }
 }
