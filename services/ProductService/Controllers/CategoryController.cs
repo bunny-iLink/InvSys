@@ -86,7 +86,7 @@ namespace ProductService.Controllers
             category.LastUpdatedBy = updatedCategory.LastUpdatedBy;
             var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
             category.LastUpdatedOn = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istTimeZone);
-            
+
             await _context.SaveChangesAsync();
             return Ok(category);
         }

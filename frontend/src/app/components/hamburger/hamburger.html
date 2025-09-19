@@ -21,12 +21,31 @@
       >
         Dashboard
       </button>
+
+      <!-- Parent Button -->
       <button
-        class="btn menu-btn mb-2 text-start"
-        (click)="navigateTo(`${user.role}/products`)"
+        class="btn btn-outline-dark menu-btn mb-2 text-start w-100"
+        (click)="toggleProductsDropdown()"
       >
-        Products
+        Products & Categories
       </button>
+
+      <!-- Dropdown Buttons -->
+      <div *ngIf="showProductsDropdown" class="ms-3">
+        <button
+          class="btn menu-btn mb-2 text-start w-100"
+          (click)="navigateTo(`${user.role}/products`)"
+        >
+          Manage Products
+        </button>
+        <button
+          class="btn menu-btn text-start w-100 mb-2"
+          (click)="navigateTo(`${user.role}/categories`)"
+        >
+          Manage Categories
+        </button>
+      </div>
+
       <button
         class="btn menu-btn mb-2 text-start"
         (click)="navigateTo(`${user.role}/orders`)"
@@ -49,7 +68,7 @@
         class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
         style="width: 35px; height: 35px"
       >
-        C
+        {{user?.firstName?.charAt(0).toUpperCase()}}
       </div>
       <div>
         <a

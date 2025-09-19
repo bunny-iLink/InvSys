@@ -8,7 +8,7 @@ const productProxy = createProxyMiddleware({
   target: data.PRODUCT_SERVICE_URL, // http://localhost:5052
   changeOrigin: true,
   pathRewrite: {
-    "^/api/products": "",
+    "^/api/products": "/product",
   },
   logLevel: "debug", // 👈 built-in detailed logging
   onProxyReq: (proxyReq, req, res) => {

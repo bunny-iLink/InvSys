@@ -46,11 +46,11 @@ builder.Services.AddSwaggerGen(c =>
 
 
 // Building connection string
-var ConnectionString = $"Server={Environment.GetEnvironmentVariable("DB_HOST")},{Environment.GetEnvironmentVariable("DB_PORT")};" +
+var ConnectionString = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
                        $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
                        $"User Id={Environment.GetEnvironmentVariable("DB_USER")};" +
                        $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
-                       $"Trusted_Connection=False;Encrypt=False;";
+                       $"Trusted_Connection=False;Encrypt=False;TrustServerCertificate=True;MultipleActiveResultSets=True;";
 
 // Configure Entity Framework Core with MySQL
 builder.Services.AddDbContext<UserDbContext>(options =>

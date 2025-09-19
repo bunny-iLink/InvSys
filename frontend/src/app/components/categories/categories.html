@@ -1,0 +1,110 @@
+<div class="p-4">
+  <!-- Header Row -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="fw-bold text-dark mb-0">Category Management</h2>
+    <button class="btn btn-success" (click)="openModal()">
+      + Add Category
+    </button>
+  </div>
+
+  <!-- User Table -->
+  <div class="card shadow-sm p-4">
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Category Name</th>
+            <th>Active</th>
+            <th>Created By</th>
+            <th>Last Updated By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of categories; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ category.categoryName }}</td>
+            <td>
+              <span class="badge bg-{{ category.isActive ? 'success' : 'danger' }}">
+                {{ category.isActive ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td>{{ category.createdBy }}</td>
+            <td>{{ category.lastUpdatedBy }}</td>
+            <td>
+              <button
+                class="btn btn-sm btn-primary me-2"
+                (click)="openModal(category)"
+              >
+                Edit
+              </button>
+              <button
+                class="btn btn-sm btn-danger"
+                (click)="deleteUser(category.categoryId)"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="categories.length === 0">
+            <td colspan="8" class="text-center">No categories found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="isModalOpen"
+  class="modal-backdrop fade show"
+  (click)="closeModal()"
+></div>
+
+<!-- Category Modal -->
+<div
+  class="modal fade"
+  tabindex="-1"
+  [ngClass]="{ 'show d-block': isModalOpen }"
+>
+  <div class="modal-dialog modal-lg justify-content-center align-items-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="categoryForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Category Name</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="categoryName"
+              />
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Active</label>
+              <input
+                type="checkbox"
+                class="form-check-input ms-2"
+                formControlName="isActive"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button
+          class="btn btn-primary"
+          (click)="onSubmit()"
+          [disabled]="categoryForm.invalid"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

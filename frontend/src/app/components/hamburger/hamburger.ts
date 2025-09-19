@@ -15,6 +15,11 @@ export class Hamburger {
   confirmMessage: string = '';
   showConfirm: boolean = false;
   user: User | any = {};
+  showProductsDropdown = false;
+
+  toggleProductsDropdown() {
+    this.showProductsDropdown = !this.showProductsDropdown;
+  }
 
   constructor(private router: Router, private auth: Auth) {}
 

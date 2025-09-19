@@ -77,6 +77,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./components/products/products').then((m) => m.Products),
       },
+      {
+        path: 'categories',
+        title: 'Categories | InvSys',
+        loadComponent: () =>
+          import('./components/categories/categories').then((m) => m.Users),
+      }
     ],
   },
   {

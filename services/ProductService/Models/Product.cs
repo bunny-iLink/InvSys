@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProductService.Models
 {
+    [Table("TbProducts")]
     public class Product
     {
         [Key]
@@ -21,5 +23,10 @@ namespace ProductService.Models
         [Required]
         public DateOnly ExpiryDate { get; set; }
         public bool IsActive { get; set; } = true;
+        public int CreatedBy { get; set; }
+        public int LastUpdatedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime LastUpdatedOn { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
     }
 }
