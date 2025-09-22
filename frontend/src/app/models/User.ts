@@ -4,7 +4,7 @@ export interface User {
     lastName: string | null;
     email: string | null;
     password: string | null;
-    role: 'admin' | 'customer' | 'employee';
+    role: 'admin' | 'customer' | 'employee' | 'superadmin';
     isActive: boolean;
     isVerified: boolean;
 }

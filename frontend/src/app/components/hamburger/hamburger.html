@@ -5,19 +5,24 @@
   (cancelled)="onCancelLogout()"
 ></app-confirm>
 
+<!-- Sidebar -->
 <div
-  class="bg-light shadow-sm d-flex flex-column justify-content-between p-3"
-  style="width: 250px; min-height: 100vh"
+  class="sidebar bg-light shadow-sm d-flex flex-column justify-content-between p-3"
+  [ngClass]="{ collapsed: isCollapsed }"
 >
-  <!-- Logo / Title -->
-  <div class="mb-4 text-center">
-    <h4 class="fw-bold text-dark">InvSys</h4>
+  <!-- Header (Logo + Toggle Button + Navigation) -->
+  <div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="fw-bold text-dark m-0" *ngIf="!isCollapsed">InvSys</h4>
+      <button class="btn menu-btn" (click)="toggleSidebar()">☰</button>
+    </div>
 
-    <!-- Navigation Buttons -->
-    <div class="d-flex flex-column mt-4">
+    <!-- Navigation Buttons (moved just below header) -->
+    <div class="d-flex flex-column mt-2" *ngIf="!isCollapsed">
       <button
         class="btn menu-btn mb-2 text-start"
-        (click)="navigateTo(`${user.role}/dashboard`)"
+        [ngClass]="{ active: activeMenu === 'dashboard' }"
+        (click)="setActive('dashboard'); navigateTo(`${user.role}/dashboard`)"
       >
         Dashboard
       </button>
@@ -25,23 +30,26 @@
       <!-- Parent Button -->
       <button
         class="btn btn-outline-dark menu-btn mb-2 text-start w-100"
-        *ngIf="user.role === 'admin' || user.role === 'employee'"
-        (click)="toggleProductsDropdown()"
+        [ngClass]="{ active: activeMenu === 'products and categories' }"
+        *ngIf="user.role === 'superadmin' || user.role === 'admin' || user.role === 'employee'"
+        (click)="setActive('products and categories'); toggleProductsDropdown()"
       >
         Products & Categories
       </button>
 
       <!-- Dropdown Buttons -->
-      <div *ngIf="showProductsDropdown" class="ms-3">
+      <div *ngIf="showProductsDropdown && !isCollapsed" class="ms-3">
         <button
           class="btn menu-btn mb-2 text-start w-100"
-          (click)="navigateTo(`${user.role}/products`)"
+          [ngClass]="{ active: activeMenu === 'manage products' }"
+          (click)="setActive('manage products'); navigateTo(`${user.role}/products`)"
         >
           Manage Products
         </button>
         <button
           class="btn menu-btn text-start w-100 mb-2"
-          (click)="navigateTo(`${user.role}/categories`)"
+          [ngClass]="{ active: activeMenu === 'manage categories' }"
+          (click)="setActive('manage categories'); navigateTo(`${user.role}/categories`)"
         >
           Manage Categories
         </button>
@@ -49,31 +57,54 @@
 
       <button
         class="btn menu-btn mb-2 text-start"
+        [ngClass]="{ active: activeMenu === 'products' }"
         *ngIf="user.role === 'customer'"
-        (click)="navigateTo(`${user.role}/products`)"
-      >Products
+        (click)="setActive('products'); navigateTo(`${user.role}/products`)"
+      >
+        Products
       </button>
 
       <button
         class="btn menu-btn mb-2 text-start"
+        [ngClass]="{ active: activeMenu === 'my orders' }"
         *ngIf="user.role === 'customer'"
-        (click)="navigateTo(`${user.role}/orders`)"
+        (click)="setActive('my orders'); navigateTo(`${user.role}/orders`)"
       >
         My Orders
       </button>
 
       <button
         class="btn menu-btn mb-2 text-start"
-        *ngIf="user.role === 'admin' || user.role === 'employee'"
-        (click)="navigateTo(`${user.role}/orders`)"
+        [ngClass]="{ active: activeMenu === 'orders' }"
+        *ngIf="user.role === 'superadmin' || user.role === 'admin' || user.role === 'employee'"
+        (click)="setActive('orders'); toggleOrdersDropdown()"
       >
         Orders
       </button>
 
+      <!-- Dropdown Buttons -->
+      <div *ngIf="showOrdersDropdown && !isCollapsed" class="ms-3">
+        <button
+          class="btn menu-btn mb-2 text-start w-100"
+          [ngClass]="{ active: activeMenu === 'manage purchases' }"
+          (click)="setActive('manage purchases'); navigateTo(`${user.role}/purchaseorders`)"
+        >
+          Manage Purchases
+        </button>
+        <button
+          class="btn menu-btn text-start w-100 mb-2"
+          [ngClass]="{ active: activeMenu === 'manage sales' }"
+          (click)="setActive('manage sales'); navigateTo(`${user.role}/sales`)"
+        >
+          Manage Sales
+        </button>
+      </div>
+
       <button
         class="btn menu-btn mb-2 text-start"
-        *ngIf="user.role === 'admin'"
-        (click)="navigateTo(`${user.role}/users`)"
+        [ngClass]="{ active: activeMenu === 'users' }"
+        *ngIf="user.role === 'superadmin' || user.role === 'admin'"
+        (click)="setActive('users'); navigateTo(`${user.role}/users`)"
       >
         Users
       </button>
@@ -81,7 +112,7 @@
   </div>
 
   <!-- Footer (User + Logout) -->
-  <div class="mt-4 border-top pt-3">
+  <div class="mt-4 border-top pt-3" *ngIf="!isCollapsed">
     <div class="d-flex align-items-center">
       <div
         class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"

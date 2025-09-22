@@ -8,7 +8,7 @@ const orderProxy = createProxyMiddleware({
   target: data.ORDER_SERVICE_URL, // http://localhost:5052
   changeOrigin: true,
   pathRewrite: {
-    "^/api/orders": "/order",
+    "^/api/orders": "",
   },
   logLevel: "debug", // 👈 built-in detailed logging
   onProxyReq: (proxyReq, req, res) => {

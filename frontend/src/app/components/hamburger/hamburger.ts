@@ -16,9 +16,24 @@ export class Hamburger {
   showConfirm: boolean = false;
   user: User | any = {};
   showProductsDropdown = false;
+  showOrdersDropdown = false;
+  isCollapsed = false;
+  activeMenu: string = '';
+
+  setActive(menu: string) {
+    this.activeMenu = menu;
+  }
 
   toggleProductsDropdown() {
     this.showProductsDropdown = !this.showProductsDropdown;
+  }
+
+  toggleOrdersDropdown() {
+    this.showOrdersDropdown = !this.showOrdersDropdown;
+  }
+
+  toggleSidebar() {
+    this.isCollapsed = !this.isCollapsed;
   }
 
   constructor(private router: Router, private auth: Auth) {}

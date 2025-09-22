@@ -53,6 +53,44 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./components/products/products').then((m) => m.Products),
       },
+      {
+        path: 'orders',
+        title: 'My Orders | InvSys',
+        loadComponent: () =>
+          import('./components/orders/orders').then((m) => m.Orders),
+      },
+    ],
+  },
+  {
+    path: 'employee',
+    component: Layout,
+    children: [
+      {
+        path: 'dashboard',
+        title: 'Dashboard | InvSys',
+        loadComponent: () =>
+          import('./components/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'products',
+        title: 'Products | InvSys',
+        loadComponent: () =>
+          import('./components/products/products').then((m) => m.Products),
+      },
+      {
+        path: 'purchaseorders',
+        title: 'Purchases | InvSys',
+        loadComponent: () =>
+          import('./components/purchaseorders/purchaseorders').then(
+            (m) => m.Purchaseorders
+          ),
+      },
+      {
+        path: 'salesorders',
+        title: 'Sales | InvSys',
+        loadComponent: () =>
+          import('./components/orders/orders').then((m) => m.Orders),
+      },
     ],
   },
   {
@@ -80,12 +118,29 @@ export const routes: Routes = [
       {
         path: 'categories',
         title: 'Categories | InvSys',
-        loadComponent: () => import('./components/categories/categories').then((m) => m.Categories)
-      }
+        loadComponent: () =>
+          import('./components/categories/categories').then(
+            (m) => m.Categories
+          ),
+      },
+      {
+        path: 'purchaseorders',
+        title: 'Purchases | InvSys',
+        loadComponent: () =>
+          import('./components/purchaseorders/purchaseorders').then(
+            (m) => m.Purchaseorders
+          ),
+      },
+      {
+        path: 'salesorders',
+        title: 'Sales | InvSys',
+        loadComponent: () =>
+          import('./components/orders/orders').then((m) => m.Orders),
+      },
     ],
   },
   {
-    path: 'employee',
+    path: 'superadmin',
     component: Layout,
     children: [
       {
@@ -95,10 +150,38 @@ export const routes: Routes = [
           import('./components/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
+        path: 'users',
+        title: 'Users | InvSys',
+        loadComponent: () =>
+          import('./components/users/users').then((m) => m.Users),
+      },
+      {
         path: 'products',
         title: 'Products | InvSys',
         loadComponent: () =>
           import('./components/products/products').then((m) => m.Products),
+      },
+      {
+        path: 'categories',
+        title: 'Categories | InvSys',
+        loadComponent: () =>
+          import('./components/categories/categories').then(
+            (m) => m.Categories
+          ),
+      },
+      {
+        path: 'purchaseorders',
+        title: 'Purchases | InvSys',
+        loadComponent: () =>
+          import('./components/purchaseorders/purchaseorders').then(
+            (m) => m.Purchaseorders
+          ),
+      },
+      {
+        path: 'sales',
+        title: 'Sales | InvSys',
+        loadComponent: () =>
+          import('./components/orders/orders').then((m) => m.Orders),
       },
     ],
   },

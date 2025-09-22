@@ -26,9 +26,13 @@ namespace UserService.Controllers
         [HttpGet("getAllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _context.Users
+                .Where(u => u.Role != "superadmin") 
+                .ToListAsync();
+
             return Ok(users);
         }
+
 
         /// <summary>
         /// Get user by ID endpoint. This will be called from the frontend to retrieve a user by their ID.
@@ -99,10 +103,16 @@ namespace UserService.Controllers
             user.FirstName = updatedUser.FirstName;
             user.LastName = updatedUser.LastName;
             user.Email = updatedUser.Email;
-            user.Password = updatedUser.Password;
             user.Role = updatedUser.Role;
             user.IsActive = updatedUser.IsActive;
             user.IsVerified = updatedUser.IsVerified;
+
+            // ✅ Only hash password if a new one is provided
+            if (!string.IsNullOrWhiteSpace(updatedUser.Password))
+            {
+                // Re-hash the new password
+                user.Password = BCrypt.Net.BCrypt.HashPassword(updatedUser.Password);
+            }
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();

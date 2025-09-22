@@ -5,69 +5,67 @@
   (cancelled)="onCancelDelete()"
 ></app-confirm>
 
-<div class="p-4">
-  <!-- Header Row -->
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="fw-bold text-dark mb-0">User Management</h2>
-    <button class="btn btn-success" (click)="openModal()">+ Add User</button>
-  </div>
+<!-- Header Row -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h2 class="fw-bold text-dark mb-0">User Management</h2>
+  <button class="btn btn-success" (click)="openModal()">+ Add User</button>
+</div>
 
-  <!-- User Table -->
-  <div class="card shadow-sm p-4">
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Active</th>
-            <th>Verified</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of users; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ user.firstName }}</td>
-            <td>{{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>
-              <span class="badge bg-{{ user.isActive ? 'success' : 'danger' }}">
-                {{ user.isActive ? 'Yes' : 'No' }}
-              </span>
-            </td>
-            <td>
-              <span
-                class="badge bg-{{ user.isVerified ? 'success' : 'warning' }}"
-              >
-                {{ user.isVerified ? 'Yes' : 'No' }}
-              </span>
-            </td>
-            <td>
-              <button
-                class="btn btn-sm btn-primary me-2"
-                (click)="openModal(user)"
-              >
-                Edit
-              </button>
-              <button
-                class="btn btn-sm btn-danger"
-                (click)="deleteUser(user.userId)"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="users.length === 0">
-            <td colspan="8" class="text-center">No users found.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+<!-- User Table -->
+<div class="card shadow-sm p-4">
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Active</th>
+          <th>Verified</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ user.firstName }}</td>
+          <td>{{ user.lastName }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role }}</td>
+          <td>
+            <span class="badge bg-{{ user.isActive ? 'success' : 'danger' }}">
+              {{ user.isActive ? 'Yes' : 'No' }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="badge bg-{{ user.isVerified ? 'success' : 'warning' }}"
+            >
+              {{ user.isVerified ? 'Yes' : 'No' }}
+            </span>
+          </td>
+          <td>
+            <button
+              class="btn btn-sm btn-primary me-2"
+              (click)="openModal(user)"
+            >
+              <i class="bi bi-pencil-fill"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-danger"
+              (click)="deleteUser(user.userId)"
+            >
+              <i class="bi bi-trash3-fill"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="users.length === 0">
+          <td colspan="8" class="text-center">No users found.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -131,7 +129,9 @@
                 formControlName="role"
                 aria-placeholder="Select Role"
               >
-                <option value="" selected>Select Category</option>
+                <option value="" default selected disabled>
+                  Select Category
+                </option>
                 <option value="admin">Admin</option>
                 <option value="customer">Customer</option>
                 <option value="employee">Employee</option>
