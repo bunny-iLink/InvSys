@@ -22,7 +22,7 @@ export class Categories implements OnInit {
   isModalOpen: boolean = false;
   user: User | null = null;
   users: any[] = [];
-  userMap: { [key: number]: string } = {};
+  userMap: { [key: string]: string } = {};
   confirmMessage = '';
   showConfirm = false;
   selectedCategoryDelete: number = 0;
@@ -54,9 +54,12 @@ export class Categories implements OnInit {
         this.users = data;
         // build lookup map for fast access
         this.userMap = this.users.reduce((acc: any, user: any) => {
-          acc[user.userId] = `${user.firstName} ${user.lastName}`;
+          acc[user.userId.toString()] =
+            `${user.firstName} ${user.lastName}`.trim();
           return acc;
         }, {});
+
+        console.log('User Map: ', this.userMap);
       },
       error: () => {
         this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
@@ -68,6 +71,8 @@ export class Categories implements OnInit {
     this.categoryService.getAllCategories().subscribe({
       next: (data: Category[]) => {
         this.categories = data;
+        console.log(this.categories);
+        
         // this.toast.showToast(
         //   'Success',
         //   'Users fetched successfully',

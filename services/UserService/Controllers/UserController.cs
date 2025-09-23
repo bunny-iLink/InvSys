@@ -27,8 +27,13 @@ namespace UserService.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _context.Users
-                .Where(u => u.Role != "superadmin") 
+                .Where(u => u.Role != "superadmin")
                 .ToListAsync();
+
+            foreach (var u in users)
+            {
+                Console.WriteLine($"UserId={u.UserId}, IsVerified={u.IsVerified}, IsActive={u.IsActive}");
+            }
 
             return Ok(users);
         }

@@ -48,11 +48,25 @@ export class Login {
         .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: (response: any) => {
-            console.log('Login successful', response);
+            console.log('Login response:', response);
 
-            // Assuming your service stores the user data in localStorage
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const role = user.role || 'customer'; // fallback if role missing
+            // The response itself is the user object
+            const user = response;
+            const role = user.Role?.toLowerCase() || 'customer';
+
+            // Check if the customer is not verified
+            if (user.Role === 'customer' && !user.IsVerified) {
+              this.toast.showToast(
+                'Error',
+                'Please verify your email before logging in.',
+                'error',
+                3000
+              );
+              return; // stop further execution
+            }
+
+            // Store user in localStorage
+            localStorage.setItem('user', JSON.stringify(user));
 
             this.toast.showToast(
               'Success',

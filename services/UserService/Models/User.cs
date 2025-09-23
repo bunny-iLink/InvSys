@@ -18,8 +18,7 @@ namespace UserService.Models
         public string Role { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string? VerificationToken { get; set; } = string.Empty;
-
+        [Column("IsVerified")]
         public bool IsVerified { get; set; } = false;
-
     }
 }

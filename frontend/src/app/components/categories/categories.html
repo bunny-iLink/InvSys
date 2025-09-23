@@ -37,13 +37,13 @@
             </span>
           </td>
           <td>
-            {{ category.createdBy ? userMap[category.createdBy] : 'Unknown' }}
-          </td>
-          <td>
-            {{ category.lastUpdatedBy ? userMap[category.lastUpdatedBy] :
+            {{ category.createdBy ? userMap[category.createdBy.toString()] :
             'Unknown' }}
           </td>
-
+          <td>
+            {{ category.lastUpdatedBy ?
+            userMap[category.lastUpdatedBy.toString()] : 'Unknown' }}
+          </td>
           <td>
             <button
               class="btn btn-sm btn-primary me-2"

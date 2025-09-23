@@ -46,6 +46,8 @@ export class Users implements OnInit {
     this.userService.getAllUsers().subscribe({
       next: (data: User[]) => {
         this.users = data.map((user) => ({ ...user, password: '' }));
+        console.log('Users: ', this.users);
+
         // this.toast.showToast(
         //   'Success',
         //   'Users fetched successfully',
@@ -63,14 +65,27 @@ export class Users implements OnInit {
     if (user) {
       this.modalTitle = 'Edit User';
       this.selectedUser = user;
-      this.userForm.patchValue({ ...user, Password: '' });
+      this.userForm.patchValue({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        password: '', // lowercase
+        role: user.role,
+        isActive: user.isActive,
+        isVerified: user.isVerified,
+      });
     } else {
+      // Add mode
       this.modalTitle = 'Add User';
       this.selectedUser = null;
       this.userForm.reset({
-        Role: '',
-        IsActive: true,
-        IsVerified: false,
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        role: '',
+        isActive: true,
+        isVerified: false,
       });
     }
     this.isModalOpen = true;

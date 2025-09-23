@@ -37,6 +37,11 @@ namespace UserService.Controllers
                 return Unauthorized("Invalid email or user is inactive.");
             }
 
+            if (user.Role == "customer" && !user.IsVerified)
+            {
+                return Unauthorized("Please verify your email before logging in.");
+            }
+
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password);
 
             if (!isPasswordValid)
