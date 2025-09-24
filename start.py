@@ -44,7 +44,7 @@ try:
     #     shell=True
     # ))
 
-    print("\n✅ All services started (including ngrok). Press Ctrl+C to stop.\n")
+    print("\n✅ All services started. Press Ctrl+C to stop.\n")
 
     # Keep script alive until interrupted
     for p in processes:

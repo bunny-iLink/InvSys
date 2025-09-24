@@ -86,7 +86,7 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'salesorders',
+        path: 'sales',
         title: 'Sales | InvSys',
         loadComponent: () =>
           import('./components/orders/orders').then((m) => m.Orders),
@@ -132,7 +132,7 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'salesorders',
+        path: 'sales',
         title: 'Sales | InvSys',
         loadComponent: () =>
           import('./components/orders/orders').then((m) => m.Orders),

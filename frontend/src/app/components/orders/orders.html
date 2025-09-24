@@ -1,1 +1,156 @@
-<p>orders works!</p>
+<app-confirm
+  [message]="confirmMessage"
+  [show]="showConfirm"
+  (confirmed)="onConfirmDelete()"
+  (cancelled)="onCancelDelete()"
+></app-confirm>
+
+<!-- Header Row -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h2 class="fw-bold text-dark mb-0">Sales Orders</h2>
+  <button
+    *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
+    class="btn btn-success"
+    (click)="openModal()"
+  >
+    + Create Order
+  </button>
+</div>
+
+<!-- Sales Orders Table -->
+<div class="card shadow-sm p-4">
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th class="text-center">#</th>
+          <th class="text-center">Order Name</th>
+          <th class="text-center">Customer Name</th>
+          <th class="text-center">Product Name</th>
+          <th class="text-center">Quantity</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of salesOrders; let i = index">
+          <td class="text-center">{{ i + 1 }}</td>
+          <td class="text-center">{{ order.orderName }}</td>
+          <td class="text-center">{{ order.customerName }}</td>
+          <td class="text-center">{{ order.productName }}</td>
+          <td class="text-center">{{ order.quantity }}</td>
+          <td class="text-center">
+            <select
+              class="form-select form-select-sm"
+              [(ngModel)]="order.status"
+              (ngModelChange)="updateStatus(order, $event)"
+              [disabled]="user?.role === 'customer'"
+            >
+              <option value="Ordered">Ordered</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Dispatched">Dispatched</option>
+            </select>
+          </td>
+          <td class="d-flex justify-content-center align-items-center">
+            <button
+              class="btn btn-sm btn-primary me-2"
+              (click)="openModal(order)"
+            >
+              <i class="bi bi-pencil-fill"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-danger"
+              (click)="deleteSalesOrder(order.salesOrderId)"
+            >
+              <i class="bi bi-trash3-fill"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="salesOrders.length === 0">
+          <td colspan="7" class="text-center">No orders found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div
+  *ngIf="isModalOpen"
+  class="modal-backdrop fade show"
+  (click)="closeModal()"
+></div>
+
+<!-- Sales Order Modal -->
+<div
+  class="modal fade"
+  tabindex="-1"
+  [ngClass]="{ 'show d-block': isModalOpen }"
+>
+  <div class="modal-dialog modal-lg justify-content-center align-items-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="productForm">
+          <div class="row">
+            <div
+              *ngIf="
+                user?.role === 'superadmin' ||
+                user?.role === 'admin' ||
+                user?.role === 'employee'
+              "
+              class="col-md-12 mb-3"
+            >
+              <label class="form-label">Product Name</label>
+              <select class="form-select" formControlName="productName">
+                <option value="" disabled>Select Product</option>
+                <option
+                  *ngFor="let product of products"
+                  [value]="product.productId"
+                >
+                  {{ product.productName }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Customer Dropdown -->
+            <div
+              *ngIf="user?.role === 'superadmin' || user?.role === 'admin'"
+              class="col-md-12 mb-3"
+            >
+              <label class="form-label">Customer</label>
+              <select class="form-select" formControlName="customerId">
+                <option value="" disabled>Select Customer</option>
+                <option *ngFor="let cust of customers" [value]="cust.userId">
+                  {{ cust.firstName }} {{ cust.lastName }} ({{ cust.userId }})
+                </option>
+              </select>
+            </div>
+
+            <!-- Quantity Input -->
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Quantity</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="quantity"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button
+          class="btn btn-primary"
+          (click)="onSubmit()"
+          [disabled]="productForm.invalid"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

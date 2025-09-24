@@ -304,16 +304,15 @@ export class Products implements OnInit {
 
     console.log('Sales Order Payload:', payload);
 
-    // 👉 Later integrate with backend API
-    // this.salesOrderService.createSalesOrder(payload).subscribe({
-    //   next: () => {
-    //     this.toast.showToast('Success', 'Sales order placed successfully', 'success', 3000);
-    //     this.closeQuantityModal();
-    //   },
-    //   error: () => {
-    //     this.toast.showToast('Error', 'Failed to place sales order', 'error', 3000);
-    //   }
-    // });
+    this.salesOrderService.createSalesOrder(payload).subscribe({
+      next: () => {
+        this.toast.showToast('Success', 'Sales order placed successfully', 'success', 3000);
+        this.closeQuantityModal();
+      },
+      error: () => {
+        this.toast.showToast('Error', 'Failed to place sales order', 'error', 3000);
+      }
+    });
   }
 
   private resetConfirm() {

@@ -7,6 +7,7 @@ namespace OrderService.Models
     public class SalesOrder
     {
         [Key]
+        [Column("SalesOrderId")]
         public int SalesOrdersId { get; set; }
         public string OrderName { get; set; } = string.Empty;
         [Required]
