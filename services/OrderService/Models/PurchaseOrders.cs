@@ -7,7 +7,7 @@ namespace OrderService.Models
     public class PurchaseOrder
     {
         [Key]
-        public int PurchaseOrdersId { get; set; }
+        public int PurchaseOrderId { get; set; }
         public string OrderName { get; set; } = string.Empty;
         [Required]
         public int ProductId { get; set; }

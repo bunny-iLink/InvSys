@@ -17,34 +17,34 @@
     <table class="table table-bordered table-hover align-middle">
       <thead class="table-light">
         <tr>
-          <th>#</th>
-          <th>Category Name</th>
-          <th>Active</th>
-          <th>Created By</th>
-          <th>Last Updated By</th>
-          <th>Actions</th>
+          <th class="text-center">#</th>
+          <th class="text-center">Category Name</th>
+          <th class="text-center">Active</th>
+          <th class="text-center">Created By</th>
+          <th class="text-center">Last Updated By</th>
+          <th class="text-center">Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let category of categories; let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ category.categoryName }}</td>
-          <td>
+          <td class="text-center">{{ i + 1 }}</td>
+          <td class="text-center">{{ category.categoryName }}</td>
+          <td class="text-center">
             <span
               class="badge bg-{{ category.isActive ? 'success' : 'danger' }}"
             >
               {{ category.isActive ? 'Yes' : 'No' }}
             </span>
           </td>
-          <td>
+          <td class="text-center">
             {{ category.createdBy ? userMap[category.createdBy.toString()] :
             'Unknown' }}
           </td>
-          <td>
+          <td class="text-center">
             {{ category.lastUpdatedBy ?
             userMap[category.lastUpdatedBy.toString()] : 'Unknown' }}
           </td>
-          <td>
+          <td class="d-flex justify-content-center align-items-center">
             <button
               class="btn btn-sm btn-primary me-2"
               (click)="openModal(category)"

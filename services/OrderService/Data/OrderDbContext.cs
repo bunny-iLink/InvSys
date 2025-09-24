@@ -10,6 +10,6 @@ namespace OrderService.Data
         }
 
         public DbSet<SalesOrder> SalesOrders { get; set; }
-        public DbSet<PurchaseOrder> Categories { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
     }
 }

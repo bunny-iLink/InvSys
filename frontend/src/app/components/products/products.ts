@@ -8,6 +8,8 @@ import { CustomToastService } from '../../services/toastr';
 import { User } from '../../models/User';
 import { Category as CategoryService } from '../../services/category';
 import { Confirm } from '../confirm/confirm';
+import { PurchaseOrderService } from '../../services/purchase-order-service';
+import { SalesOrderService } from '../../services/sales-order-service';
 
 @Component({
   selector: 'app-products',
@@ -17,6 +19,7 @@ import { Confirm } from '../confirm/confirm';
 export class Products implements OnInit {
   products: Product[] = [];
   productForm!: FormGroup;
+  quantityForm!: FormGroup;
   selectedProduct: Product | null = null;
   modalTitle: string = 'Add Product';
   isModalOpen: boolean = false;
@@ -25,12 +28,15 @@ export class Products implements OnInit {
   selectedDeleteProduct: number = 0;
   confirmMessage = '';
   showConfirm = false;
+  isQuantityModalOpen = false;
 
   constructor(
     private fb: FormBuilder,
     private toast: CustomToastService,
     private productService: ProductService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private purchaseOrderService: PurchaseOrderService,
+    private salesOrderService: SalesOrderService
   ) {}
 
   ngOnInit(): void {
@@ -69,6 +75,10 @@ export class Products implements OnInit {
       lastUpdatedBy: [this.user?.userId || null],
       manufacturer: [''],
       sku: [''],
+    });
+
+    this.quantityForm = this.fb.group({
+      orderQuantity: [1, [Validators.required, Validators.min(1)]],
     });
   }
 
@@ -120,6 +130,18 @@ export class Products implements OnInit {
       });
     }
     this.isModalOpen = true;
+  }
+
+  openQuantityModal(product: any) {
+    console.log('openQuantityModal received:', product); // 👈 debug
+    this.selectedProduct = product;
+    this.isQuantityModalOpen = true;
+    this.quantityForm.reset({ orderQuantity: 1 });
+  }
+
+  closeQuantityModal() {
+    this.isQuantityModalOpen = false;
+    this.selectedProduct = null;
   }
 
   closeModal() {
@@ -217,6 +239,81 @@ export class Products implements OnInit {
 
   onCancelDelete() {
     this.resetConfirm();
+  }
+
+  confirmPurchaseOrder() {
+    console.log('Purchase Order function called');
+
+    if (!this.selectedProduct || this.quantityForm.invalid) {
+      return;
+    }
+
+    const payload = {
+      PurchaseOrderId: 0, 
+      OrderName: `PO-${Date.now()}`, 
+      ProductId: this.selectedProduct.productId,
+      ProductName: this.selectedProduct.productName,
+      Quantity: this.quantityForm.value.orderQuantity,
+      Status: 'Pending', // default status
+      CreatedOn: new Date().toISOString(),
+      CreatedBy: this.user?.userId || 0,
+      LastUpdatedOn: new Date().toISOString(),
+      LastUpdatedBy: this.user?.userId || 0,
+    };
+
+    console.log('Purchase Order Payload:', payload);
+
+    this.purchaseOrderService.createPurchaseOrder(payload).subscribe({
+      next: () => {
+        this.toast.showToast(
+          'Success',
+          'Order placed successfully',
+          'success',
+          3000
+        );
+        this.closeQuantityModal();
+      },
+      error: () => {
+        this.toast.showToast('Error', 'Failed to place order', 'error', 3000);
+      },
+    });
+  }
+
+  confirmSalesOrder() {
+    console.log('Sales Order function called');
+
+    if (!this.selectedProduct || this.quantityForm.invalid) {
+      return;
+    }
+
+    const payload = {
+      SalesOrderId: 0, // let DB auto-generate if identity
+      OrderName: `SO-${Date.now()}`, // generate order name
+      CustomerId: this.user?.userId || 0, // map logged-in user
+      CustomerName:
+        `${this.user?.firstName} ${this.user?.lastName}` || 'Unknown',
+      ProductId: this.selectedProduct.productId,
+      ProductName: this.selectedProduct.productName,
+      Quantity: this.quantityForm.value.orderQuantity,
+      Status: 'Pending', // default status
+      CreatedOn: new Date().toISOString(),
+      CreatedBy: this.user?.userId || 0,
+      LastUpdatedOn: new Date().toISOString(),
+      LastUpdatedBy: this.user?.userId || 0,
+    };
+
+    console.log('Sales Order Payload:', payload);
+
+    // 👉 Later integrate with backend API
+    // this.salesOrderService.createSalesOrder(payload).subscribe({
+    //   next: () => {
+    //     this.toast.showToast('Success', 'Sales order placed successfully', 'success', 3000);
+    //     this.closeQuantityModal();
+    //   },
+    //   error: () => {
+    //     this.toast.showToast('Error', 'Failed to place sales order', 'error', 3000);
+    //   }
+    // });
   }
 
   private resetConfirm() {

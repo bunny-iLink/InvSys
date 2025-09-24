@@ -52,7 +52,7 @@ export class Login {
 
             // The response itself is the user object
             const user = response;
-            const role = user.Role?.toLowerCase() || 'customer';
+            const role = user.role?.toLowerCase();
 
             // Check if the customer is not verified
             if (user.Role === 'customer' && !user.IsVerified) {
