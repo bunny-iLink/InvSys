@@ -37,12 +37,12 @@ try:
                 shell=True
             ))
 
-    # Start ngrok tunnel
-    # print("🌐 Starting ngrok tunnel...")
-    # processes.append(subprocess.Popen(
-    #     ["ngrok", "http", "--domain=zoographical-unenchanted-kiera.ngrok-free.dev", "4200"],
-    #     shell=True
-    # ))
+    # Start RabbitMQ
+    print("🚀 Starting RabbitMQ...")
+    processes.append(subprocess.Popen(
+        ["rabbitmq-server"],
+        shell=True
+    ))
 
     print("\n✅ All services started. Press Ctrl+C to stop.\n")
 

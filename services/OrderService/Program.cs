@@ -2,6 +2,7 @@ using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OrderService.Data;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// MassTransit setup
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+    });
+});
 
 // Building connection string
 var ConnectionString = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +

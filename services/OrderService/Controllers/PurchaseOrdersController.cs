@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.Models;
+using MassTransit;
 
 namespace OrderService.Controllers
 {

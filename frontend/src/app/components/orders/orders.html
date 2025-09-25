@@ -7,7 +7,8 @@
 
 <!-- Header Row -->
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h2 class="fw-bold text-dark mb-0">Sales Orders</h2>
+  <h2 *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'" class="fw-bold text-dark mb-0">Sales Orders</h2>
+  <h2 *ngIf="user?.role === 'customer'" class="fw-bold text-dark mb-0">My Orders</h2>
   <button
     *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
     class="btn btn-success"
