@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.Models;
+using Contracts;
+using MassTransit;
 
 namespace OrderService.Controllers
 {
@@ -12,10 +14,12 @@ namespace OrderService.Controllers
     public class SalesOrderController : ControllerBase
     {
         private readonly OrderDbContext _context;
+        public readonly IPublishEndpoint _publishEndpoint;
 
-        public SalesOrderController(OrderDbContext context)
+        public SalesOrderController(OrderDbContext context, IPublishEndpoint publishEndpoint)
         {
             _context = context;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpGet("getAllOrders")]
@@ -84,6 +88,16 @@ namespace OrderService.Controllers
             // Save changes
             _context.SalesOrders.Update(order);
             await _context.SaveChangesAsync();
+
+            if (order.Status == "Confirmed")
+            {
+                await _publishEndpoint.Publish<CustomerOrderConfirmed>(new
+                {
+                    OrderId = order.SalesOrdersId,
+                    ProductId = order.ProductId,
+                    Quantity = order.Quantity
+                });
+            }
 
             return Ok(new
             {

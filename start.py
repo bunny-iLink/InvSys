@@ -29,7 +29,7 @@ try:
     print("🚀 Starting .NET services...")
     for service in os.listdir(SERVICES_DIR):
         service_path = os.path.join(SERVICES_DIR, service)
-        if os.path.isdir(service_path):
+        if os.path.isdir(service_path) and service.lower() != "contracts":
             print(f"   🔹 Starting {service}...")
             processes.append(subprocess.Popen(
                 ["dotnet", "run"],

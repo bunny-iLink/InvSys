@@ -254,7 +254,7 @@ export class Products implements OnInit {
       ProductId: this.selectedProduct.productId,
       ProductName: this.selectedProduct.productName,
       Quantity: this.quantityForm.value.orderQuantity,
-      Status: 'Pending', // default status
+      Status: 'Ordered', // default status
       CreatedOn: new Date().toISOString(),
       CreatedBy: this.user?.userId || 0,
       LastUpdatedOn: new Date().toISOString(),
@@ -295,7 +295,7 @@ export class Products implements OnInit {
       ProductId: this.selectedProduct.productId,
       ProductName: this.selectedProduct.productName,
       Quantity: this.quantityForm.value.orderQuantity,
-      Status: 'Pending', // default status
+      Status: 'Ordered', // default status
       CreatedOn: new Date().toISOString(),
       CreatedBy: this.user?.userId || 0,
       LastUpdatedOn: new Date().toISOString(),

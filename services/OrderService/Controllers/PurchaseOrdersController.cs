@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.Models;
 using MassTransit;
+using Contracts;
 
 namespace OrderService.Controllers
 {
@@ -13,10 +14,12 @@ namespace OrderService.Controllers
     public class PurchaseOrderController : ControllerBase
     {
         private readonly OrderDbContext _context;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public PurchaseOrderController(OrderDbContext context)
+        public PurchaseOrderController(OrderDbContext context, IPublishEndpoint publishEndpoint)
         {
             _context = context;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpGet("getAllOrders")]
@@ -29,6 +32,8 @@ namespace OrderService.Controllers
         [HttpPost("neworder")]
         public async Task<IActionResult> NewOrder([FromBody] PurchaseOrder purchaseOrder)
         {
+            Console.WriteLine("Received payload:");
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(purchaseOrder));
             if (purchaseOrder == null)
             {
                 return BadRequest(new { message = "Please try again" });
@@ -85,6 +90,16 @@ namespace OrderService.Controllers
             // Save changes
             _context.PurchaseOrders.Update(order);
             await _context.SaveChangesAsync();
+
+            if (order.Status == "Received")
+            {
+                await _publishEndpoint.Publish<InventoryOrderReceived>(new
+                {
+                    OrderId = order.PurchaseOrderId,
+                    ProductId = order.ProductId,
+                    Quantity = order.Quantity
+                });
+            }
 
             return Ok(new { message = "Purchase order updated successfully", data = order });
 

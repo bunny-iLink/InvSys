@@ -34,10 +34,10 @@
           <td class="text-center">
             <select
               class="form-select form-select-sm"
+              [disabled]="order.status === 'Received'"
               [(ngModel)]="order.status"
               (ngModelChange)="updateStatus(order, $event)"
             >
-              <option value="Pending">Pending</option>
               <option value="Ordered">Ordered</option>
               <option value="Confirmed">Confirmed</option>
               <option value="Received">Received</option>

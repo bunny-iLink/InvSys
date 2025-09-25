@@ -1,7 +1,10 @@
+using Contracts;
 using DotNetEnv;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using ProductService.Data;
+using ProductService.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +39,28 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         { securityScheme, Array.Empty<string>() }
+    });
+});
+
+// MassTransit Setup
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<InventoryOrderReceivedConsumer>();
+    x.AddConsumer<CustomerOrderConfirmedConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ReceiveEndpoint("product-service", e =>
+        {
+            e.ConfigureConsumer<InventoryOrderReceivedConsumer>(context);
+            e.ConfigureConsumer<CustomerOrderConfirmedConsumer>(context);
+        });
     });
 });
 

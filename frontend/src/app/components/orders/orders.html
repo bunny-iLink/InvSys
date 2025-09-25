@@ -47,8 +47,8 @@
               (ngModelChange)="updateStatus(order, $event)"
               [disabled]="user?.role === 'customer'"
             >
-              <option value="Ordered">Ordered</option>
-              <option value="Confirmed">Confirmed</option>
+              <option [disabled]="order.status === 'Confirmed'" value="Ordered">Ordered</option>
+              <option [disabled]="order.status === 'Confirmed'" value="Confirmed">Confirmed</option>
               <option value="Dispatched">Dispatched</option>
             </select>
           </td>

@@ -99,6 +99,8 @@ export class Orders implements OnInit {
         );
       } else {
         this.salesOrders = mappedOrders;
+        console.log(this.salesOrders);
+        
       }
     });
   }
