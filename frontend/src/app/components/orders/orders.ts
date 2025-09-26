@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SalesOrderService } from '../../services/sales-order-service'; // adjust path
+import { SalesOrderService } from '../../services/sales-order-service';
 import { Product as ProductService } from '../../services/product';
 import { Product } from '../../models/Product';
 import { SalesOrder } from '../../models/SalesOrder';
@@ -9,9 +9,10 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CustomToastService } from '../../services/toastr';
 import { User as UserService } from '../../services/user';
+import { finalize } from 'rxjs';
 
 @Component({
-  selector: 'app-purchaseorders',
+  selector: 'app-orders',
   templateUrl: './orders.html',
   styleUrls: ['./orders.css'],
   imports: [Confirm, CommonModule, ReactiveFormsModule, FormsModule],
@@ -19,6 +20,7 @@ import { User as UserService } from '../../services/user';
 export class Orders implements OnInit {
   products: Product[] = [];
   salesOrders: SalesOrder[] = [];
+  customers: any[] = [];
   productForm!: FormGroup;
 
   isModalOpen = false;
@@ -30,14 +32,21 @@ export class Orders implements OnInit {
   deleteOrderId: number | null = null;
 
   user: any;
-  customers: any = [];
+
+  // Loading flags
+  isProductsLoading = false;
+  isCustomersLoading = false;
+  isOrdersLoading = false;
+  isSubmitting = false;
+  isUpdatingStatus = false;
+  isDeleting = false;
 
   constructor(
     private fb: FormBuilder,
     private salesOrderService: SalesOrderService,
     private productService: ProductService,
-    private toastService: CustomToastService,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: CustomToastService
   ) {}
 
   ngOnInit(): void {
@@ -47,8 +56,8 @@ export class Orders implements OnInit {
 
     this.initForm();
     this.fetchProducts();
-    this.fetchSalesOrders();
     this.fetchCustomers();
+    this.fetchSalesOrders();
   }
 
   initForm() {
@@ -60,49 +69,84 @@ export class Orders implements OnInit {
   }
 
   fetchProducts() {
-    this.productService.getAllProducts().subscribe((res: Product[]) => {
-      this.products = res;
-    });
+    this.isProductsLoading = true;
+    this.productService
+      .getAllProducts()
+      .pipe(finalize(() => (this.isProductsLoading = false)))
+      .subscribe({
+        next: (res: Product[]) => {
+          this.products = res;
+        },
+        error: () => {
+          this.toastService.showToast(
+            'Error',
+            'Failed to fetch products',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   fetchCustomers() {
-    this.userService.getAllUsers().subscribe((res: any) => {
-      // Keep only users with role 'customer'
-      this.customers = res.filter((u: any) => u.role === 'customer');
-      console.log(this.customers);
-      
-    });
+    this.isCustomersLoading = true;
+    this.userService
+      .getAllUsers()
+      .pipe(finalize(() => (this.isCustomersLoading = false)))
+      .subscribe({
+        next: (res: any[]) => {
+          this.customers = res.filter((u) => u.role === 'customer');
+        },
+        error: () => {
+          this.toastService.showToast(
+            'Error',
+            'Failed to fetch customers',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   fetchSalesOrders() {
-    this.salesOrderService.getAllOrders().subscribe((res: any) => {
-      // Map backend properties to frontend model
-      const mappedOrders = res.map((order: any) => ({
-        salesOrderId: order.salesOrdersId, // map to frontend property
-        orderName: order.orderName,
-        customerId: order.customerId,
-        customerName: order.customerName,
-        productId: order.productId,
-        productName: order.productName,
-        quantity: order.quantity,
-        status: order.status,
-        createdBy: order.createdBy,
-        createdOn: order.createdOn,
-        lastUpdatedBy: order.lastUpdatedBy,
-        lastUpdatedOn: order.lastUpdatedOn,
-      }));
+    this.isOrdersLoading = true;
+    this.salesOrderService
+      .getAllOrders()
+      .pipe(finalize(() => (this.isOrdersLoading = false)))
+      .subscribe({
+        next: (res: any) => {
+          const mappedOrders = res.map((order: any) => ({
+            salesOrderId: order.salesOrdersId,
+            orderName: order.orderName,
+            customerId: order.customerId,
+            customerName: order.customerName,
+            productId: order.productId,
+            productName: order.productName,
+            quantity: order.quantity,
+            status: order.status,
+            createdBy: order.createdBy,
+            createdOn: order.createdOn,
+            lastUpdatedBy: order.lastUpdatedBy,
+            lastUpdatedOn: order.lastUpdatedOn,
+          }));
 
-      // Filter based on role
-      if (this.user?.role === 'customer') {
-        this.salesOrders = mappedOrders.filter(
-          (order: any) => order.customerId === this.user?.userId
-        );
-      } else {
-        this.salesOrders = mappedOrders;
-        console.log(this.salesOrders);
-        
-      }
-    });
+          if (this.user?.role === 'customer') {
+            this.salesOrders = mappedOrders.filter(
+              (order: any) => order.customerId === this.user?.userId
+            );
+          } else {
+            this.salesOrders = mappedOrders;
+          }
+        },
+        error: () => {
+          this.toastService.showToast(
+            'Error',
+            'Failed to fetch sales orders',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   openModal(order: SalesOrder | null = null) {
@@ -113,30 +157,31 @@ export class Orders implements OnInit {
     if (order) {
       this.productForm.patchValue({
         productName: order.productId,
+        customerId: order.customerId,
         quantity: order.quantity,
       });
     } else {
-      this.productForm.reset();
+      this.productForm.reset({ customerId: this.user?.userId || '' });
     }
   }
 
   closeModal() {
     this.isModalOpen = false;
     this.selectedOrder = null;
-    this.productForm.reset();
+    this.productForm.reset({ customerId: this.user?.userId || '' });
   }
 
   onSubmit() {
     if (this.productForm.invalid) return;
 
+    this.isSubmitting = true;
+
     const now = new Date().toISOString();
     const product = this.products.find(
       (p) => p.productId === +this.productForm.value.productName
     );
-
-    // Find selected customer object
     const selectedCustomer = this.customers.find(
-      (c: any) => c.userId === +this.productForm.value.customerId
+      (c) => c.userId === +this.productForm.value.customerId
     );
 
     const payload: SalesOrder = {
@@ -145,7 +190,9 @@ export class Orders implements OnInit {
         ? this.selectedOrder.orderName
         : `SO-${Date.now()}`,
       customerId: selectedCustomer?.userId || this.user?.userId || 0,
-      customerName: `${selectedCustomer.firstName} ${selectedCustomer.lastName}` || '',
+      customerName: `${selectedCustomer?.firstName || ''} ${
+        selectedCustomer?.lastName || ''
+      }`.trim(),
       productId: this.productForm.value.productName,
       productName: product?.productName || '',
       quantity: this.productForm.value.quantity,
@@ -158,24 +205,40 @@ export class Orders implements OnInit {
       lastUpdatedOn: now,
     };
 
-    if (this.selectedOrder) {
-      // Update existing order
-      this.salesOrderService
-        .updateSalesOrder(this.selectedOrder.salesOrderId, payload)
-        .subscribe(() => {
-          this.fetchSalesOrders();
-          this.closeModal();
-        });
-    } else {
-      // Create new order
-      this.salesOrderService.createSalesOrder(payload).subscribe(() => {
+    const request$ = this.selectedOrder
+      ? this.salesOrderService.updateSalesOrder(
+          this.selectedOrder.salesOrderId,
+          payload
+        )
+      : this.salesOrderService.createSalesOrder(payload);
+
+    request$.pipe(finalize(() => (this.isSubmitting = false))).subscribe({
+      next: () => {
         this.fetchSalesOrders();
         this.closeModal();
-      });
-    }
+        this.toastService.showToast(
+          'Success',
+          this.selectedOrder
+            ? 'Order updated successfully'
+            : 'Order created successfully',
+          'success',
+          3000
+        );
+      },
+      error: () => {
+        this.toastService.showToast(
+          'Error',
+          'Something went wrong. Please try again',
+          'error',
+          3000
+        );
+      },
+    });
   }
 
   updateStatus(order: SalesOrder, newStatus: string) {
+    this.isUpdatingStatus = true;
+
     const payload: SalesOrder = {
       ...order,
       status: newStatus,
@@ -185,6 +248,7 @@ export class Orders implements OnInit {
 
     this.salesOrderService
       .updateSalesOrder(order.salesOrderId, payload)
+      .pipe(finalize(() => (this.isUpdatingStatus = false)))
       .subscribe({
         next: () => {
           order.status = newStatus;
@@ -213,10 +277,15 @@ export class Orders implements OnInit {
   }
 
   onConfirmDelete() {
-    if (this.deleteOrderId !== null) {
-      this.salesOrderService
-        .deleteSalesOrder(this.deleteOrderId)
-        .subscribe(() => {
+    if (this.deleteOrderId === null) return;
+
+    this.isDeleting = true;
+
+    this.salesOrderService
+      .deleteSalesOrder(this.deleteOrderId)
+      .pipe(finalize(() => (this.isDeleting = false)))
+      .subscribe({
+        next: () => {
           this.fetchSalesOrders();
           this.showConfirm = false;
           this.deleteOrderId = null;
@@ -226,12 +295,32 @@ export class Orders implements OnInit {
             'success',
             3000
           );
-        });
-    }
+        },
+        error: () => {
+          this.toastService.showToast(
+            'Error',
+            'Failed to delete order',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   onCancelDelete() {
     this.showConfirm = false;
     this.deleteOrderId = null;
+  }
+
+  // Optional global loading getter
+  get isLoading() {
+    return (
+      this.isProductsLoading ||
+      this.isCustomersLoading ||
+      this.isOrdersLoading ||
+      this.isSubmitting ||
+      this.isUpdatingStatus ||
+      this.isDeleting
+    );
   }
 }

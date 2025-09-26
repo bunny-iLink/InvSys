@@ -3,5 +3,5 @@ export interface Category {
   categoryName: string;
   isActive: boolean;
   createdBy: number;
-  lastUpdatedBy: number | null;
+  lastUpdatedBy: number;
 }

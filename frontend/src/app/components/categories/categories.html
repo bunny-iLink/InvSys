@@ -5,6 +5,20 @@
   (cancelled)="onCancelDelete()"
 ></app-confirm>
 
+<div
+  *ngIf="isLoading"
+  class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75"
+  style="z-index: 1050"
+>
+  <div
+    class="spinner-border text-primary"
+    role="status"
+    style="width: 3rem; height: 3rem"
+  >
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
 <!-- Header Row -->
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h2 class="fw-bold text-dark mb-0">Category Management</h2>
@@ -20,8 +34,8 @@
           <th class="text-center">#</th>
           <th class="text-center">Category Name</th>
           <th class="text-center">Active</th>
-          <th class="text-center">Created By</th>
-          <th class="text-center">Last Updated By</th>
+          <!-- <th class="text-center">Created By</th>
+          <th class="text-center">Last Updated By</th> -->
           <th class="text-center">Actions</th>
         </tr>
       </thead>
@@ -36,14 +50,16 @@
               {{ category.isActive ? 'Yes' : 'No' }}
             </span>
           </td>
+          <!-- <td class="text-center">
+            {{ category.createdBy !== undefined ?
+            (userMap[category.createdBy.toString()] || 'Unknown') : 'Unknown' }}
+          </td>
           <td class="text-center">
-            {{ category.createdBy ? userMap[category.createdBy.toString()] :
+            {{ category.lastUpdatedBy !== undefined ?
+            (userMap[category.lastUpdatedBy.toString()] || 'Unknown') :
             'Unknown' }}
-          </td>
-          <td class="text-center">
-            {{ category.lastUpdatedBy ?
-            userMap[category.lastUpdatedBy.toString()] : 'Unknown' }}
-          </td>
+          </td> -->
+
           <td class="d-flex justify-content-center align-items-center">
             <button
               class="btn btn-sm btn-primary me-2"

@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PurchaseOrderService } from '../../services/purchase-order-service'; // adjust path
+import { PurchaseOrderService } from '../../services/purchase-order-service';
 import { Product as ProductService } from '../../services/product';
 import { Product } from '../../models/Product';
 import { PurchaseOrder } from '../../models/PurchaseOrder';
 import { Confirm } from '../confirm/confirm';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CustomToastService } from '../../services/toastr';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-purchaseorders',
@@ -28,6 +28,13 @@ export class Purchaseorders implements OnInit {
   showConfirm = false;
   confirmMessage = '';
   deleteOrderId: number | null = null;
+
+  // Loading flags
+  isProductsLoading = false;
+  isOrdersLoading = false;
+  isSubmitting = false;
+  isUpdatingStatus = false;
+  isDeleting = false;
 
   user: any;
 
@@ -55,16 +62,46 @@ export class Purchaseorders implements OnInit {
     });
   }
 
+  // Fetch products
   fetchProducts() {
-    this.productService.getAllProducts().subscribe((res: Product[]) => {
-      this.products = res;
-    });
+    this.isProductsLoading = true;
+    this.productService
+      .getAllProducts()
+      .pipe(finalize(() => (this.isProductsLoading = false)))
+      .subscribe({
+        next: (res: Product[]) => {
+          this.products = res;
+        },
+        error: () => {
+          this.toastService.showToast(
+            'Error',
+            'Failed to fetch products',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
+  // Fetch purchase orders
   fetchPurchaseOrders() {
-    this.purchaseOrderService.getAllOrders().subscribe((res: any) => {
-      this.purchaseOrders = res;
-    });
+    this.isOrdersLoading = true;
+    this.purchaseOrderService
+      .getAllOrders()
+      .pipe(finalize(() => (this.isOrdersLoading = false)))
+      .subscribe({
+        next: (res: any) => {
+          this.purchaseOrders = res as PurchaseOrder[];
+        },
+        error: () => {
+          this.toastService.showToast(
+            'Error',
+            'Failed to fetch purchase orders',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   openModal(order: PurchaseOrder | null = null) {
@@ -88,8 +125,11 @@ export class Purchaseorders implements OnInit {
     this.productForm.reset();
   }
 
+  // Create or update purchase order
   onSubmit() {
     if (this.productForm.invalid) return;
+
+    this.isSubmitting = true;
 
     const now = new Date().toISOString();
     const product = this.products.find(
@@ -97,7 +137,7 @@ export class Purchaseorders implements OnInit {
     );
 
     const payload = {
-      OrderName: `PO-${Date.now()}`, // auto-generated order name
+      OrderName: `PO-${Date.now()}`,
       ProductId: this.productForm.value.productName,
       ProductName: product?.productName || '',
       Quantity: this.productForm.value.quantity,
@@ -108,24 +148,39 @@ export class Purchaseorders implements OnInit {
       LastUpdatedOn: now,
     };
 
-    if (this.selectedOrder) {
-      // Update existing order
-      this.purchaseOrderService
-        .updatePurchaseOrder(this.selectedOrder.purchaseOrderId, payload)
-        .subscribe(() => {
-          this.fetchPurchaseOrders();
-          this.closeModal();
-        });
-    } else {
-      // Create new order
-      this.purchaseOrderService.createPurchaseOrder(payload).subscribe(() => {
+    const request$ = this.selectedOrder
+      ? this.purchaseOrderService.updatePurchaseOrder(
+          this.selectedOrder.purchaseOrderId,
+          payload
+        )
+      : this.purchaseOrderService.createPurchaseOrder(payload);
+
+    request$.pipe(finalize(() => (this.isSubmitting = false))).subscribe({
+      next: () => {
         this.fetchPurchaseOrders();
         this.closeModal();
-      });
-    }
+        this.toastService.showToast(
+          'Success',
+          this.selectedOrder ? 'Order updated' : 'Order created',
+          'success',
+          3000
+        );
+      },
+      error: () => {
+        this.toastService.showToast(
+          'Error',
+          'Something went wrong. Please try again',
+          'error',
+          3000
+        );
+      },
+    });
   }
 
-  updateStatus(order: any, newStatus: string) {
+  // Update order status
+  updateStatus(order: PurchaseOrder, newStatus: string) {
+    this.isUpdatingStatus = true;
+
     const payload = {
       purchaseOrderId: order.purchaseOrderId,
       orderName: order.orderName,
@@ -141,6 +196,7 @@ export class Purchaseorders implements OnInit {
 
     this.purchaseOrderService
       .updatePurchaseOrder(order.purchaseOrderId, payload)
+      .pipe(finalize(() => (this.isUpdatingStatus = false)))
       .subscribe({
         next: () => {
           order.status = newStatus;
@@ -162,6 +218,7 @@ export class Purchaseorders implements OnInit {
       });
   }
 
+  // Delete purchase order
   deletePurchaseOrder(orderId: number) {
     this.deleteOrderId = orderId;
     this.confirmMessage = 'Are you sure you want to delete this order?';
@@ -169,19 +226,49 @@ export class Purchaseorders implements OnInit {
   }
 
   onConfirmDelete() {
-    if (this.deleteOrderId !== null) {
-      this.purchaseOrderService
-        .deletePurchaseOrder(this.deleteOrderId)
-        .subscribe(() => {
+    if (this.deleteOrderId === null) return;
+
+    this.isDeleting = true;
+
+    this.purchaseOrderService
+      .deletePurchaseOrder(this.deleteOrderId)
+      .pipe(finalize(() => (this.isDeleting = false)))
+      .subscribe({
+        next: () => {
           this.fetchPurchaseOrders();
           this.showConfirm = false;
           this.deleteOrderId = null;
-        });
-    }
+          this.toastService.showToast(
+            'Success',
+            'Order deleted successfully',
+            'success',
+            3000
+          );
+        },
+        error: () => {
+          this.toastService.showToast(
+            'Error',
+            'Failed to delete order',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   onCancelDelete() {
     this.showConfirm = false;
     this.deleteOrderId = null;
+  }
+
+  // Global loading getter (optional)
+  get isLoading() {
+    return (
+      this.isProductsLoading ||
+      this.isOrdersLoading ||
+      this.isSubmitting ||
+      this.isUpdatingStatus ||
+      this.isDeleting
+    );
   }
 }

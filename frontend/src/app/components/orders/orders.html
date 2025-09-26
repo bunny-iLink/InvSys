@@ -5,10 +5,31 @@
   (cancelled)="onCancelDelete()"
 ></app-confirm>
 
+<div
+  *ngIf="isLoading"
+  class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75"
+  style="z-index: 1050"
+>
+  <div
+    class="spinner-border text-primary"
+    role="status"
+    style="width: 3rem; height: 3rem"
+  >
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
 <!-- Header Row -->
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h2 *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'" class="fw-bold text-dark mb-0">Sales Orders</h2>
-  <h2 *ngIf="user?.role === 'customer'" class="fw-bold text-dark mb-0">My Orders</h2>
+  <h2
+    *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
+    class="fw-bold text-dark mb-0"
+  >
+    Sales Orders
+  </h2>
+  <h2 *ngIf="user?.role === 'customer'" class="fw-bold text-dark mb-0">
+    My Orders
+  </h2>
   <button
     *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
     class="btn btn-success"
@@ -47,8 +68,15 @@
               (ngModelChange)="updateStatus(order, $event)"
               [disabled]="user?.role === 'customer'"
             >
-              <option [disabled]="order.status === 'Confirmed'" value="Ordered">Ordered</option>
-              <option [disabled]="order.status === 'Confirmed'" value="Confirmed">Confirmed</option>
+              <option [disabled]="order.status === 'Confirmed'" value="Ordered">
+                Ordered
+              </option>
+              <option
+                [disabled]="order.status === 'Confirmed'"
+                value="Confirmed"
+              >
+                Confirmed
+              </option>
               <option value="Dispatched">Dispatched</option>
             </select>
           </td>

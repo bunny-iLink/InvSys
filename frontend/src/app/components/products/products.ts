@@ -10,6 +10,7 @@ import { Category as CategoryService } from '../../services/category';
 import { Confirm } from '../confirm/confirm';
 import { PurchaseOrderService } from '../../services/purchase-order-service';
 import { SalesOrderService } from '../../services/sales-order-service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-products',
@@ -30,6 +31,13 @@ export class Products implements OnInit {
   showConfirm = false;
   isQuantityModalOpen = false;
 
+  // Loading flags
+  isProductsLoading = false;
+  isCategoriesLoading = false;
+  isSubmitting = false;
+  isDeleting = false;
+  isOrderSubmitting = false;
+
   constructor(
     private fb: FormBuilder,
     private toast: CustomToastService,
@@ -40,9 +48,6 @@ export class Products implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
-    this.loadCategories();
-
     if (typeof window !== 'undefined') {
       this.user = JSON.parse(localStorage.getItem('user') || '{}');
     }
@@ -57,7 +62,7 @@ export class Products implements OnInit {
         [
           Validators.required,
           Validators.min(0),
-          Validators.pattern(/^\d+(\.\d{1,2})?$/), // up to 2 decimals
+          Validators.pattern(/^\d+(\.\d{1,2})?$/),
         ],
       ],
       quantity: [
@@ -65,7 +70,7 @@ export class Products implements OnInit {
         [
           Validators.required,
           Validators.min(0),
-          Validators.pattern(/^[0-9]+$/), // only integers
+          Validators.pattern(/^[0-9]+$/),
         ],
       ],
       mfgOn: [''],
@@ -80,39 +85,50 @@ export class Products implements OnInit {
     this.quantityForm = this.fb.group({
       orderQuantity: [1, [Validators.required, Validators.min(1)]],
     });
+
+    this.loadProducts();
+    this.loadCategories();
   }
 
   loadProducts() {
-    this.productService.getAllProducts().subscribe({
-      next: (data: Product[]) => {
-        this.products = data;
-        console.log(this.products);
-      },
-      error: (err) => {
-        this.toast.showToast(
-          'Error',
-          'Failed to fetch products',
-          'error',
-          3000
-        );
-      },
-    });
+    this.isProductsLoading = true;
+    this.productService
+      .getAllProducts()
+      .pipe(finalize(() => (this.isProductsLoading = false)))
+      .subscribe({
+        next: (data: Product[]) => {
+          this.products = data;
+          console.log(this.products);
+        },
+        error: () => {
+          this.toast.showToast(
+            'Error',
+            'Failed to fetch products',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   loadCategories() {
-    this.categoryService.getAllCategories().subscribe({
-      next: (data) => {
-        this.categories = data;
-      },
-      error: () => {
-        this.toast.showToast(
-          'Error',
-          'Failed to fetch categories',
-          'error',
-          3000
-        );
-      },
-    });
+    this.isCategoriesLoading = true;
+    this.categoryService
+      .getAllCategories()
+      .pipe(finalize(() => (this.isCategoriesLoading = false)))
+      .subscribe({
+        next: (data) => {
+          this.categories = data;
+        },
+        error: () => {
+          this.toast.showToast(
+            'Error',
+            'Failed to fetch categories',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   openModal(product?: Product) {
@@ -132,8 +148,11 @@ export class Products implements OnInit {
     this.isModalOpen = true;
   }
 
+  closeModal() {
+    this.isModalOpen = false;
+  }
+
   openQuantityModal(product: any) {
-    console.log('openQuantityModal received:', product); // 👈 debug
     this.selectedProduct = product;
     this.isQuantityModalOpen = true;
     this.quantityForm.reset({ orderQuantity: 1 });
@@ -144,13 +163,10 @@ export class Products implements OnInit {
     this.selectedProduct = null;
   }
 
-  closeModal() {
-    this.isModalOpen = false;
-  }
-
   onSubmit() {
     if (this.productForm.invalid) return;
 
+    this.isSubmitting = true;
     const payload: Product = {
       productId: this.selectedProduct ? this.selectedProduct.productId : 0,
       productName: this.productForm.value.productName,
@@ -167,44 +183,27 @@ export class Products implements OnInit {
       sku: this.productForm.value.sku,
     };
 
-    if (this.selectedProduct) {
-      this.productService.updateProduct(payload.productId, payload).subscribe({
-        next: () => {
-          this.toast.showToast(
-            'Success',
-            'Product updated successfully',
-            'success',
-            3000
-          );
-          this.loadProducts();
-          this.closeModal();
-        },
-        error: () => {
-          this.toast.showToast(
-            'Error',
-            'Failed to update product',
-            'error',
-            3000
-          );
-        },
-      });
-    } else {
-      this.productService.addProduct(payload).subscribe({
-        next: () => {
-          this.toast.showToast(
-            'Success',
-            'Product added successfully',
-            'success',
-            3000
-          );
-          this.loadProducts();
-          this.closeModal();
-        },
-        error: () => {
-          this.toast.showToast('Error', 'Failed to add product', 'error', 3000);
-        },
-      });
-    }
+    const request$ = this.selectedProduct
+      ? this.productService.updateProduct(payload.productId, payload)
+      : this.productService.addProduct(payload);
+
+    request$.pipe(finalize(() => (this.isSubmitting = false))).subscribe({
+      next: () => {
+        this.toast.showToast(
+          'Success',
+          this.selectedProduct
+            ? 'Product updated successfully'
+            : 'Product added successfully',
+          'success',
+          3000
+        );
+        this.loadProducts();
+        this.closeModal();
+      },
+      error: () => {
+        this.toast.showToast('Error', 'Failed to save product', 'error', 3000);
+      },
+    });
   }
 
   deleteProduct(productId: number) {
@@ -214,27 +213,31 @@ export class Products implements OnInit {
   }
 
   onConfirmDelete() {
-    this.productService.deleteProduct(this.selectedDeleteProduct).subscribe({
-      next: () => {
-        this.loadProducts();
-        this.toast.showToast(
-          'Success',
-          'Product deleted successfully',
-          'success',
-          3000
-        );
-        this.resetConfirm();
-      },
-      error: () => {
-        this.toast.showToast(
-          'Error',
-          'Failed to delete product',
-          'error',
-          3000
-        );
-        this.resetConfirm();
-      },
-    });
+    this.isDeleting = true;
+    this.productService
+      .deleteProduct(this.selectedDeleteProduct)
+      .pipe(finalize(() => (this.isDeleting = false)))
+      .subscribe({
+        next: () => {
+          this.loadProducts();
+          this.toast.showToast(
+            'Success',
+            'Product deleted successfully',
+            'success',
+            3000
+          );
+          this.resetConfirm();
+        },
+        error: () => {
+          this.toast.showToast(
+            'Error',
+            'Failed to delete product',
+            'error',
+            3000
+          );
+          this.resetConfirm();
+        },
+      });
   }
 
   onCancelDelete() {
@@ -242,77 +245,83 @@ export class Products implements OnInit {
   }
 
   confirmPurchaseOrder() {
-    console.log('Purchase Order function called');
+    if (!this.selectedProduct || this.quantityForm.invalid) return;
 
-    if (!this.selectedProduct || this.quantityForm.invalid) {
-      return;
-    }
-
+    this.isOrderSubmitting = true;
     const payload = {
-      PurchaseOrderId: 0, 
-      OrderName: `PO-${Date.now()}`, 
+      PurchaseOrderId: 0,
+      OrderName: `PO-${Date.now()}`,
       ProductId: this.selectedProduct.productId,
       ProductName: this.selectedProduct.productName,
       Quantity: this.quantityForm.value.orderQuantity,
-      Status: 'Ordered', // default status
+      Status: 'Ordered',
       CreatedOn: new Date().toISOString(),
       CreatedBy: this.user?.userId || 0,
       LastUpdatedOn: new Date().toISOString(),
       LastUpdatedBy: this.user?.userId || 0,
     };
 
-    console.log('Purchase Order Payload:', payload);
-
-    this.purchaseOrderService.createPurchaseOrder(payload).subscribe({
-      next: () => {
-        this.toast.showToast(
-          'Success',
-          'Order placed successfully',
-          'success',
-          3000
-        );
-        this.closeQuantityModal();
-      },
-      error: () => {
-        this.toast.showToast('Error', 'Failed to place order', 'error', 3000);
-      },
-    });
+    this.purchaseOrderService
+      .createPurchaseOrder(payload)
+      .pipe(finalize(() => (this.isOrderSubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.toast.showToast(
+            'Success',
+            'Order placed successfully',
+            'success',
+            3000
+          );
+          this.closeQuantityModal();
+        },
+        error: () => {
+          this.toast.showToast('Error', 'Failed to place order', 'error', 3000);
+        },
+      });
   }
 
   confirmSalesOrder() {
-    console.log('Sales Order function called');
+    if (!this.selectedProduct || this.quantityForm.invalid) return;
 
-    if (!this.selectedProduct || this.quantityForm.invalid) {
-      return;
-    }
-
+    this.isOrderSubmitting = true;
     const payload = {
-      SalesOrderId: 0, // let DB auto-generate if identity
-      OrderName: `SO-${Date.now()}`, // generate order name
-      CustomerId: this.user?.userId || 0, // map logged-in user
+      SalesOrderId: 0,
+      OrderName: `SO-${Date.now()}`,
+      CustomerId: this.user?.userId || 0,
       CustomerName:
         `${this.user?.firstName} ${this.user?.lastName}` || 'Unknown',
       ProductId: this.selectedProduct.productId,
       ProductName: this.selectedProduct.productName,
       Quantity: this.quantityForm.value.orderQuantity,
-      Status: 'Ordered', // default status
+      Status: 'Ordered',
       CreatedOn: new Date().toISOString(),
       CreatedBy: this.user?.userId || 0,
       LastUpdatedOn: new Date().toISOString(),
       LastUpdatedBy: this.user?.userId || 0,
     };
 
-    console.log('Sales Order Payload:', payload);
-
-    this.salesOrderService.createSalesOrder(payload).subscribe({
-      next: () => {
-        this.toast.showToast('Success', 'Sales order placed successfully', 'success', 3000);
-        this.closeQuantityModal();
-      },
-      error: () => {
-        this.toast.showToast('Error', 'Failed to place sales order', 'error', 3000);
-      }
-    });
+    this.salesOrderService
+      .createSalesOrder(payload)
+      .pipe(finalize(() => (this.isOrderSubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.toast.showToast(
+            'Success',
+            'Sales order placed successfully',
+            'success',
+            3000
+          );
+          this.closeQuantityModal();
+        },
+        error: () => {
+          this.toast.showToast(
+            'Error',
+            'Failed to place sales order',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   private resetConfirm() {
@@ -324,12 +333,22 @@ export class Products implements OnInit {
   onCategoryChange(event: any) {
     const categoryId = +event.target.value;
     const category = this.categories.find((c) => c.categoryId === categoryId);
-
     if (category) {
       this.productForm.patchValue({
         categoryId: category.categoryId,
         categoryName: category.categoryName,
       });
     }
+  }
+
+  // Optional global isLoading getter
+  get isLoading() {
+    return (
+      this.isProductsLoading ||
+      this.isCategoriesLoading ||
+      this.isSubmitting ||
+      this.isDeleting ||
+      this.isOrderSubmitting
+    );
   }
 }

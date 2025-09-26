@@ -8,6 +8,7 @@ import { CustomToastService } from '../../services/toastr';
 import { User } from '../../models/User';
 import { User as UserService } from '../../services/user';
 import { Confirm } from '../confirm/confirm';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-categories',
@@ -27,6 +28,12 @@ export class Categories implements OnInit {
   showConfirm = false;
   selectedCategoryDelete: number = 0;
 
+  // Loading flags
+  isUsersLoading = false;
+  isCategoriesLoading = false;
+  isSubmitting = false;
+  isDeleting = false;
+
   constructor(
     private fb: FormBuilder,
     private categoryService: CategoryService,
@@ -35,9 +42,6 @@ export class Categories implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadCategories();
-    this.loadUsers();
-
     if (typeof window !== 'undefined') {
       this.user = JSON.parse(localStorage.getItem('user') || '{}');
     }
@@ -46,49 +50,62 @@ export class Categories implements OnInit {
       categoryName: ['', Validators.required],
       isActive: [true],
     });
+
+    this.loadUsersAndCategories();
   }
 
-  loadUsers() {
-    this.userService.getAllUsers().subscribe({
-      next: (data) => {
-        this.users = data;
-        // build lookup map for fast access
-        this.userMap = this.users.reduce((acc: any, user: any) => {
-          acc[user.userId.toString()] =
-            `${user.firstName} ${user.lastName}`.trim();
-          return acc;
-        }, {});
+  loadUsersAndCategories() {
+    this.isUsersLoading = true;
+    this.userService
+      .getAllUsers()
+      .pipe(finalize(() => (this.isUsersLoading = false)))
+      .subscribe({
+        next: (data) => {
+          this.users = data;
+          this.userMap = this.users.reduce((acc: any, user: any) => {
+            acc[user.userId.toString()] =
+              `${user.firstName} ${user.lastName}`.trim();
+            return acc;
+          }, {});
+          console.log('User Map: ', this.userMap);
 
-        console.log('User Map: ', this.userMap);
-      },
-      error: () => {
-        this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
-      },
-    });
+          // Now that userMap is ready, load categories
+          this.loadCategories();
+        },
+        error: () => {
+          this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
+        },
+      });
   }
 
   loadCategories() {
-    this.categoryService.getAllCategories().subscribe({
-      next: (data: Category[]) => {
-        this.categories = data;
-        console.log(this.categories);
-        
-        // this.toast.showToast(
-        //   'Success',
-        //   'Users fetched successfully',
-        //   'success',
-        //   3000
-        // );
-      },
-      error: (err) => {
-        this.toast.showToast(
-          'Error',
-          'Failed to fetch categories',
-          'error',
-          3000
-        );
-      },
-    });
+    this.isCategoriesLoading = true;
+    this.categoryService
+      .getAllCategories()
+      .pipe(finalize(() => (this.isCategoriesLoading = false)))
+      .subscribe({
+        next: (data: Category[]) => {
+          this.categories = data.map((cat) => ({
+            ...cat,
+            createdByName:
+              cat.createdBy !== undefined
+                ? this.userMap[cat.createdBy.toString()] || 'Unknown'
+                : 'Unknown',
+            lastUpdatedByName:
+              cat.lastUpdatedBy !== undefined
+                ? this.userMap[cat.lastUpdatedBy.toString()] || 'Unknown'
+                : 'Unknown',
+          }));
+        },
+        error: () => {
+          this.toast.showToast(
+            'Error',
+            'Failed to fetch categories',
+            'error',
+            3000
+          );
+        },
+      });
   }
 
   openModal(category?: Category) {
@@ -102,10 +119,7 @@ export class Categories implements OnInit {
     } else {
       this.modalTitle = 'Add Category';
       this.selectedCategory = null;
-      this.categoryForm.reset({
-        categoryName: '',
-        IsActive: true,
-      });
+      this.categoryForm.reset({ categoryName: '', isActive: true });
     }
     this.isModalOpen = true;
   }
@@ -117,70 +131,41 @@ export class Categories implements OnInit {
   onSubmit() {
     if (this.categoryForm.invalid) return;
 
+    this.isSubmitting = true;
     const formValues = this.categoryForm.value;
 
-    if (this.selectedCategory) {
-      const payload = {
-        categoryId: this.selectedCategory.categoryId,
-        categoryName: formValues.categoryName,
-        isActive: !!formValues.isActive,
-        createdBy: this.selectedCategory.createdBy, // keep original
-        lastUpdatedBy: this.user?.userId,
-      };
-      console.log('Payload to backend (Update):', payload);
-
-      this.categoryService
-        .updateCategory(this.selectedCategory.categoryId, payload)
-        .subscribe({
-          next: () => {
-            this.toast.showToast(
-              'Success',
-              'Category updated successfully',
-              'success',
-              3000
-            );
-            this.loadCategories();
-            this.closeModal();
-          },
-          error: () => {
-            this.toast.showToast(
-              'Error',
-              'Failed to update category',
-              'error',
-              3000
-            );
-          },
+    const request$ = this.selectedCategory
+      ? this.categoryService.updateCategory(this.selectedCategory.categoryId, {
+          categoryId: this.selectedCategory.categoryId,
+          categoryName: formValues.categoryName,
+          isActive: !!formValues.isActive,
+          createdBy: this.selectedCategory.createdBy,
+          lastUpdatedBy: this.user?.userId,
+        })
+      : this.categoryService.addCategory({
+          categoryName: formValues.categoryName,
+          isActive: !!formValues.isActive,
+          createdBy: this.user?.userId,
+          lastUpdatedBy: this.user?.userId,
         });
-    } else {
-      const payload = {
-        categoryName: formValues.categoryName,
-        isActive: !!formValues.isActive,
-        createdBy: this.user?.userId,
-        lastUpdatedBy: this.user?.userId,
-      };
-      console.log('Payload to backend (Add):', payload);
 
-      this.categoryService.addCategory(payload).subscribe({
-        next: () => {
-          this.toast.showToast(
-            'Success',
-            'Category added successfully',
-            'success',
-            3000
-          );
-          this.loadCategories();
-          this.closeModal();
-        },
-        error: () => {
-          this.toast.showToast(
-            'Error',
-            'Failed to add category',
-            'error',
-            3000
-          );
-        },
-      });
-    }
+    request$.pipe(finalize(() => (this.isSubmitting = false))).subscribe({
+      next: () => {
+        this.toast.showToast(
+          'Success',
+          this.selectedCategory
+            ? 'Category updated successfully'
+            : 'Category added successfully',
+          'success',
+          3000
+        );
+        this.loadCategories();
+        this.closeModal();
+      },
+      error: () => {
+        this.toast.showToast('Error', 'Failed to save category', 'error', 3000);
+      },
+    });
   }
 
   deleteCategory(categoryId: number) {
@@ -192,27 +177,31 @@ export class Categories implements OnInit {
   onDeleteCategory() {
     if (!this.selectedCategoryDelete) return;
 
-    this.categoryService.deleteCategory(this.selectedCategoryDelete).subscribe({
-      next: () => {
-        this.loadCategories();
-        this.toast.showToast(
-          'Success',
-          'Category deleted successfully',
-          'success',
-          3000
-        );
-        this.resetConfirm();
-      },
-      error: () => {
-        this.toast.showToast(
-          'Error',
-          'Failed to delete category',
-          'error',
-          3000
-        );
-        this.resetConfirm();
-      },
-    });
+    this.isDeleting = true;
+    this.categoryService
+      .deleteCategory(this.selectedCategoryDelete)
+      .pipe(finalize(() => (this.isDeleting = false)))
+      .subscribe({
+        next: () => {
+          this.toast.showToast(
+            'Success',
+            'Category deleted successfully',
+            'success',
+            3000
+          );
+          this.loadCategories();
+          this.resetConfirm();
+        },
+        error: () => {
+          this.toast.showToast(
+            'Error',
+            'Failed to delete category',
+            'error',
+            3000
+          );
+          this.resetConfirm();
+        },
+      });
   }
 
   onCancelDelete() {
@@ -223,5 +212,15 @@ export class Categories implements OnInit {
     this.showConfirm = false;
     this.selectedCategoryDelete = 0;
     this.confirmMessage = '';
+  }
+
+  // Optional global loading getter
+  get isLoading() {
+    return (
+      this.isUsersLoading ||
+      this.isCategoriesLoading ||
+      this.isSubmitting ||
+      this.isDeleting
+    );
   }
 }

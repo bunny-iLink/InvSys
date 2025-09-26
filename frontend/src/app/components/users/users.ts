@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CustomToastService } from '../../services/toastr';
 import { Confirm } from '../confirm/confirm';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-users',
@@ -21,6 +22,7 @@ export class Users implements OnInit {
   showConfirm = false;
   confirmMessage = '';
   selectedDeleteUser = 0;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -43,22 +45,26 @@ export class Users implements OnInit {
   }
 
   loadUsers() {
-    this.userService.getAllUsers().subscribe({
-      next: (data: User[]) => {
-        this.users = data.map((user) => ({ ...user, password: '' }));
-        console.log('Users: ', this.users);
+    this.isLoading = true;
+    this.userService
+      .getAllUsers()
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (data: User[]) => {
+          this.users = data.map((user) => ({ ...user, password: '' }));
+          console.log('Users: ', this.users);
 
-        // this.toast.showToast(
-        //   'Success',
-        //   'Users fetched successfully',
-        //   'success',
-        //   3000
-        // );
-      },
-      error: (err) => {
-        this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
-      },
-    });
+          // this.toast.showToast(
+          //   'Success',
+          //   'Users fetched successfully',
+          //   'success',
+          //   3000
+          // );
+        },
+        error: (err) => {
+          this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
+        },
+      });
   }
 
   openModal(user?: User) {
