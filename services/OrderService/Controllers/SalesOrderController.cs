@@ -38,8 +38,11 @@ namespace OrderService.Controllers
             }
 
             salesOrder.SalesOrdersId = 0; // let DB auto-generate
-            salesOrder.CreatedOn = DateTime.UtcNow;
-            salesOrder.LastUpdatedOn = DateTime.UtcNow;
+            var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+            var istNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istTimeZone);
+
+            salesOrder.CreatedOn = istNow;
+            salesOrder.LastUpdatedOn = istNow;
 
             _context.Add(salesOrder);
             await _context.SaveChangesAsync();
