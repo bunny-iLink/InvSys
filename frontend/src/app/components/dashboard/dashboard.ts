@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 })
 export class Dashboard implements OnInit {
   recentSalesOrders: any[] = [];
+  recentUserOrders: any[] = [];
   user: any;
   recentPurchaseOrders: any[] = [];
   selectedOrder: any = null;
@@ -24,7 +25,10 @@ export class Dashboard implements OnInit {
   currentMonthPurchaseOrders = 0;
   currentMonthPurchaseOrdersPending = 0;
 
-  constructor(private dashboardService: DashboardService, private router: Router) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     if (typeof window !== 'undefined') {
@@ -39,10 +43,11 @@ export class Dashboard implements OnInit {
     this.getRecentPurchaseOrders();
     this.getCurrentMonthSalesOrders();
     this.getCurrentMonthPurchaseOrders();
+    this.getRecentSalesOrdersUser();
   }
 
   navigateTo(path: string) {
-    this.router.navigate([`${this.user.role}/${path}`])
+    this.router.navigate([`${this.user.role}/${path}`]);
   }
 
   getUserCounts() {
@@ -54,19 +59,19 @@ export class Dashboard implements OnInit {
   getCurrentMonthSalesOrders() {
     this.dashboardService.getCurrentMonthSalesOrders().subscribe((data) => {
       console.log(data);
-      
+
       this.currentMonthSalesOrders = data.totalOrders;
       this.currentMonthSalesOrdersPending = data.orderedCount;
-    })
+    });
   }
 
   getCurrentMonthPurchaseOrders() {
     this.dashboardService.getCurrentMonthPurchaseOrders().subscribe((data) => {
       console.log(data);
-      
+
       this.currentMonthPurchaseOrders = data.totalOrders;
       this.currentMonthPurchaseOrdersPending = data.orderedCount;
-    })
+    });
   }
 
   getProductsCount() {
@@ -85,6 +90,16 @@ export class Dashboard implements OnInit {
     this.dashboardService.getRecentSalesOrders().subscribe((data) => {
       this.recentSalesOrders = data;
     });
+  }
+
+  getRecentSalesOrdersUser() {
+    this.dashboardService
+      .getRecentSalesOrdersUser(this.user?.userId)
+      .subscribe((data) => {
+        this.recentUserOrders = data;
+        console.log(this.recentUserOrders);
+        
+      });
   }
 
   getRecentPurchaseOrders() {

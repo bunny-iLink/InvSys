@@ -18,7 +18,7 @@ namespace OrderService.Controllers
             _context = context;
         }
 
-        [HttpGet("customer/getRecentOrders")]
+        [HttpGet("inventory/getRecentOrders")]
         public async Task<IActionResult> GetRecentOrders()
         {
             var orders = await _context.SalesOrders
@@ -28,6 +28,19 @@ namespace OrderService.Controllers
 
             return Ok(orders);
         }
+
+        [HttpGet("customer/getRecentOrdersUser/{id}")]
+        public async Task<IActionResult> GetRecentOrdersUser(int id)
+        {
+            var orders = await _context.SalesOrders
+                .Where(o => o.CustomerId == id)              // filter by userId
+                .OrderByDescending(o => o.CreatedOn)     // order by date
+                .Take(5)                                 // take top 5
+                .ToListAsync();
+
+            return Ok(orders);
+        }
+
 
         [HttpGet("inventory/getRecentPurchaseOrders")]
         public async Task<IActionResult> GetRecentPurchaseOrders()

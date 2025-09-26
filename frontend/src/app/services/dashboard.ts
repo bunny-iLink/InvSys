@@ -38,7 +38,13 @@ export class Dashboard {
 
   getRecentSalesOrders(): Observable<any> {
     return this.http.get(
-      `${this.orderApiUrl}/order/dashboard/customer/getRecentOrders`
+      `${this.orderApiUrl}/order/dashboard/inventory/getRecentOrders`
+    );
+  }
+
+  getRecentSalesOrdersUser(id: number): Observable<any> {
+    return this.http.get(
+      `${this.orderApiUrl}/order/dashboard/customer/getRecentOrdersUser/${id}`
     );
   }
 

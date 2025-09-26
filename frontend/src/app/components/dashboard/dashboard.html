@@ -40,7 +40,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of recentSalesOrders">
+          <tr *ngFor="let order of recentUserOrders">
             <td>{{ order.orderName }}</td>
             <td>{{ order.productName }}</td>
             <td>{{ order.createdOn | date:'dd-MMM-yyyy, hh:mm a':'IST' }}</td>
