@@ -1,14 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Category } from '../../models/Category';
-import { Category as CategoryService } from '../../services/category';
-import { ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { CustomToastService } from '../../services/toastr';
-import { User } from '../../models/User';
-import { User as UserService } from '../../services/user';
-import { Confirm } from '../confirm/confirm';
+// Angular imports
 import { finalize } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+// Model imports
+import { User } from '../../models/User';
+import { Category } from '../../models/Category';
+
+// Service imports
+import { User as UserService } from '../../services/user';
+import { CustomToastService } from '../../services/toastr';
+import { Category as CategoryService } from '../../services/category';
+
+// Custom component imports
+import { Confirm } from '../confirm/confirm';
 
 @Component({
   selector: 'app-categories',
@@ -16,23 +23,28 @@ import { finalize } from 'rxjs';
   imports: [ReactiveFormsModule, CommonModule, Confirm],
 })
 export class Categories implements OnInit {
-  categories: Category[] = [];
-  categoryForm!: FormGroup;
-  selectedCategory: Category | null = null;
-  modalTitle: string = 'Add Category';
-  isModalOpen: boolean = false;
-  user: User | null = null;
+  // Variables to store data
   users: any[] = [];
+  user: User | null = null;
+  categories: Category[] = [];
+  selectedCategory: Category | null = null;
   userMap: { [key: string]: string } = {};
-  confirmMessage = '';
-  showConfirm = false;
   selectedCategoryDelete: number = 0;
 
-  // Loading flags
+  // Display messages
+  modalTitle: string = 'Add Category';
+  confirmMessage = '';
+
+  // Category form
+  categoryForm!: FormGroup;
+
+  // Flags
+  isDeleting = false;
+  showConfirm = false;
+  isSubmitting = false;
   isUsersLoading = false;
   isCategoriesLoading = false;
-  isSubmitting = false;
-  isDeleting = false;
+  isModalOpen: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -54,8 +66,10 @@ export class Categories implements OnInit {
     this.loadUsersAndCategories();
   }
 
+  // Function loads users and categories
   loadUsersAndCategories() {
     this.isUsersLoading = true;
+
     this.userService
       .getAllUsers()
       .pipe(finalize(() => (this.isUsersLoading = false)))
@@ -69,7 +83,6 @@ export class Categories implements OnInit {
           }, {});
           console.log('User Map: ', this.userMap);
 
-          // Now that userMap is ready, load categories
           this.loadCategories();
         },
         error: () => {
@@ -78,6 +91,7 @@ export class Categories implements OnInit {
       });
   }
 
+  // Load categories
   loadCategories() {
     this.isCategoriesLoading = true;
     this.categoryService
@@ -108,6 +122,7 @@ export class Categories implements OnInit {
       });
   }
 
+  // Open Modal function: Handles the opening and closing of modal and display title based on Add/Edit call. Patch form for Add/Edit operations
   openModal(category?: Category) {
     if (category) {
       this.modalTitle = 'Edit Category';
@@ -124,10 +139,12 @@ export class Categories implements OnInit {
     this.isModalOpen = true;
   }
 
+  // Function closes the modal. Called after clicking "Close" button
   closeModal() {
     this.isModalOpen = false;
   }
 
+  // Function handles form submission. Calls the Add Category service if new category is to be added, calls the Update Category service if updates are being done
   onSubmit() {
     if (this.categoryForm.invalid) return;
 
@@ -168,12 +185,14 @@ export class Categories implements OnInit {
     });
   }
 
+  // Primary Delete Category function, asks for confirmation from the user for deletion
   deleteCategory(categoryId: number) {
     this.selectedCategoryDelete = categoryId;
     this.confirmMessage = 'Are you sure to delete this category?';
     this.showConfirm = true;
   }
 
+  // Main logic for Delete Category. Calls the Delete Category service after user confirms the deletion from dialogue box
   onDeleteCategory() {
     if (!this.selectedCategoryDelete) return;
 
@@ -204,17 +223,19 @@ export class Categories implements OnInit {
       });
   }
 
+  // Closes the Delete Category confirmation box if clicked "No"
   onCancelDelete() {
     this.resetConfirm();
   }
 
+  // Resets the variables for confirmation box
   private resetConfirm() {
     this.showConfirm = false;
     this.selectedCategoryDelete = 0;
     this.confirmMessage = '';
   }
 
-  // Optional global loading getter
+  // Returns "True" if data is being retrieved. "False" when retrieval operation completes
   get isLoading() {
     return (
       this.isUsersLoading ||

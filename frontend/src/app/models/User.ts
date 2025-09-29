@@ -1,3 +1,4 @@
+// User Model: Represents an user. Structure as per the TbUSers table
 export interface User {
     userId: number;
     firstName: string | null;

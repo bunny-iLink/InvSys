@@ -4,13 +4,14 @@ import data from "../config/config.js";
 
 const router = express.Router();
 
+// Create a proxy middleware for user routes. Whenever the request corresponds to /api/user, redirect to user service running on USER_SERVICE_URL
 const userProxy = createProxyMiddleware({
-  target: data.USER_SERVICE_URL, // http://localhost:5005
+  target: data.USER_SERVICE_URL, 
   changeOrigin: true,
   pathRewrite: {
-    "^/api/users": "", // ✅ adjust if your backend expects `/user/...`
+    "^/api/users": "", 
   },
-  logLevel: "debug", // enables built-in detailed logs
+  logLevel: "debug", 
   onProxyReq: (proxyReq, req, res) => {
     console.log("[User Gateway] Incoming URL:", req.originalUrl);
     console.log(

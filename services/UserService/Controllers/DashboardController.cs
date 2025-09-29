@@ -15,6 +15,13 @@ namespace UserService.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Retrieves the total count of users by their roles.
+        /// </summary>
+        /// <returns>
+        /// Returns an <see cref="OkObjectResult"/> containing the number of users for each role:
+        /// "customer", "admin", and "superadmin".
+        /// </returns>
         [HttpGet("userCounts")]
         public async Task<IActionResult> GetUserCounts()
         {
@@ -29,6 +36,5 @@ namespace UserService.Controllers
                 superadmins
             });
         }
-
     }
 }

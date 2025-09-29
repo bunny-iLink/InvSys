@@ -13,6 +13,11 @@ namespace UserService.Controllers
         private readonly UserDbContext _context;
         private readonly IEmailService _emailService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserController"/> class.
+        /// </summary>
+        /// <param name="context">Database context for accessing user data.</param>
+        /// <param name="emailService">Service for sending emails to users.</param>
         public UserController(UserDbContext context, IEmailService emailService)
         {
             _context = context;
@@ -20,9 +25,9 @@ namespace UserService.Controllers
         }
 
         /// <summary>
-        /// Get all users endpoint. This will be called from the frontend to retrieve all users.
+        /// Retrieves all users excluding superadmins.
         /// </summary>
-        /// <returns>List of all users</returns>
+        /// <returns>An <see cref="OkObjectResult"/> containing a list of users.</returns>
         [HttpGet("getAllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -38,12 +43,14 @@ namespace UserService.Controllers
             return Ok(users);
         }
 
-
         /// <summary>
-        /// Get user by ID endpoint. This will be called from the frontend to retrieve a user by their ID.
+        /// Retrieves a single user by their unique ID.
         /// </summary>
-        /// <param name="id">Represents UserId which uniquely identifies a user</param>
-        /// <returns></returns>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <returns>
+        /// An <see cref="OkObjectResult"/> containing the user if found; 
+        /// <see cref="NotFoundResult"/> if the user does not exist.
+        /// </returns>
         [HttpGet("getUserById/{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
@@ -53,6 +60,7 @@ namespace UserService.Controllers
                 return NotFound();
             }
 
+            // Do not return the password
             if (user.Password != null)
             {
                 user.Password = string.Empty;
@@ -61,6 +69,15 @@ namespace UserService.Controllers
             return Ok(user);
         }
 
+        /// <summary>
+        /// Adds a new user to the database.
+        /// </summary>
+        /// <param name="user">The user object to be added.</param>
+        /// <returns>
+        /// <see cref="CreatedAtActionResult"/> if user is successfully created; 
+        /// <see cref="BadRequestResult"/> if user data is null; 
+        /// <see cref="ConflictObjectResult"/> if email already exists.
+        /// </returns>
         [HttpPost("addUser")]
         public async Task<IActionResult> AddUser([FromBody] User user)
         {
@@ -73,7 +90,6 @@ namespace UserService.Controllers
                 return BadRequest("Please provide user details.");
             }
 
-            // Check if email already exists
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
             if (existingUser != null)
             {
@@ -81,16 +97,24 @@ namespace UserService.Controllers
                 return Conflict("Email already exists.");
             }
 
-            // Hash the password using bcrypt
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
-            // Add user to database
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetAllUsers), new { id = user.UserId }, user);
         }
 
+        /// <summary>
+        /// Updates an existing user's information.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user to be updated.</param>
+        /// <param name="updatedUser">The updated user object.</param>
+        /// <returns>
+        /// <see cref="NoContentResult"/> if the update is successful; 
+        /// <see cref="BadRequestResult"/> if the updated data is invalid; 
+        /// <see cref="NotFoundObjectResult"/> if the user does not exist.
+        /// </returns>
         [HttpPut("editUser/{id}")]
         public async Task<IActionResult> EditUser(int id, [FromBody] User updatedUser)
         {
@@ -112,10 +136,8 @@ namespace UserService.Controllers
             user.IsActive = updatedUser.IsActive;
             user.IsVerified = updatedUser.IsVerified;
 
-            // ✅ Only hash password if a new one is provided
             if (!string.IsNullOrWhiteSpace(updatedUser.Password))
             {
-                // Re-hash the new password
                 user.Password = BCrypt.Net.BCrypt.HashPassword(updatedUser.Password);
             }
 
@@ -125,6 +147,14 @@ namespace UserService.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a user from the database.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user to be deleted.</param>
+        /// <returns>
+        /// <see cref="NoContentResult"/> if deletion is successful; 
+        /// <see cref="NotFoundObjectResult"/> if the user does not exist.
+        /// </returns>
         [HttpDelete("deleteUser/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

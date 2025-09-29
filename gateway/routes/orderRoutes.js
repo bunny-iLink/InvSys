@@ -4,13 +4,14 @@ import data from "../config/config.js";
 
 const router = express.Router();
 
+// Create a proxy middleware for order routes. Whenever the request corresponds to /api/orders, redirect to order service running on ORDER_SERVICE_URL
 const orderProxy = createProxyMiddleware({
-  target: data.ORDER_SERVICE_URL, // http://localhost:5052
+  target: data.ORDER_SERVICE_URL, 
   changeOrigin: true,
   pathRewrite: {
     "^/api/orders": "",
   },
-  logLevel: "debug", // 👈 built-in detailed logging
+  logLevel: "debug", 
   onProxyReq: (proxyReq, req, res) => {
     console.log("[Gateway] Incoming URL:", req.originalUrl);
     console.log(

@@ -1,3 +1,4 @@
+// Sales Order Model: Represents an order placed by a customer. Structure as per the TbSalesOrder table
 export interface SalesOrder {
   salesOrderId: number;
   orderName: string;

@@ -16,6 +16,10 @@ namespace ProductService.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Retrieves all products from the database.
+        /// </summary>
+        /// <returns>A list of <see cref="Product"/> objects.</returns>
         [HttpGet("getAllProducts")]
         public async Task<IActionResult> GetAllProducts()
         {
@@ -23,6 +27,11 @@ namespace ProductService.Controllers
             return Ok(products);
         }
 
+        /// <summary>
+        /// Retrieves a specific product by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the product to retrieve.</param>
+        /// <returns>The <see cref="Product"/> object if found; otherwise, a 404 response.</returns>
         [HttpGet("getProductById/{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
@@ -34,6 +43,11 @@ namespace ProductService.Controllers
             return Ok(product);
         }
 
+        /// <summary>
+        /// Creates a new product.
+        /// </summary>
+        /// <param name="product">The <see cref="Product"/> object to create.</param>
+        /// <returns>The created product and a 201 response.</returns>
         [HttpPost("createProduct")]
         public async Task<IActionResult> CreateProduct([FromBody] Product product)
         {
@@ -53,6 +67,12 @@ namespace ProductService.Controllers
             return CreatedAtAction(nameof(GetProductById), new { id = product.ProductId }, product);
         }
 
+        /// <summary>
+        /// Updates an existing product by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the product to update.</param>
+        /// <param name="updatedProduct">The updated <see cref="Product"/> object.</param>
+        /// <returns>No content if successful; otherwise, an error response.</returns>
         [HttpPut("updateProduct/{id}")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product updatedProduct)
         {
@@ -85,6 +105,11 @@ namespace ProductService.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a product by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the product to delete.</param>
+        /// <returns>No content if deleted successfully; otherwise, a 404 response.</returns>
         [HttpDelete("deleteProduct/{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

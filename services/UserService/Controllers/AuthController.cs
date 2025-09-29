@@ -14,6 +14,12 @@ namespace UserService.Controllers
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthController"/> class.
+        /// </summary>
+        /// <param name="context">Database context for accessing user data.</param>
+        /// <param name="tokenService">Service for generating JWT tokens.</param>
+        /// <param name="emailService">Service for sending verification emails.</param>
         public AuthController(UserDbContext context, ITokenService tokenService, IEmailService emailService)
         {
             _context = context;
@@ -22,10 +28,13 @@ namespace UserService.Controllers
         }
 
         /// <summary>
-        /// Login endpoint. This will be called from the frontend to authenticate a user.
+        /// Authenticates a user and generates a JWT token if successful.
         /// </summary>
-        /// <param name="loginRequest"></param>
-        /// <returns></returns>
+        /// <param name="loginRequest">The login request containing email and password.</param>
+        /// <returns>
+        /// Returns an <see cref="OkObjectResult"/> with a <see cref="LoginResponse"/> if authentication is successful.
+        /// Returns <see cref="UnauthorizedResult"/> if credentials are invalid or user is inactive/not verified.
+        /// </returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
@@ -64,12 +73,14 @@ namespace UserService.Controllers
             });
         }
 
-
         /// <summary>
-        /// Register endpoint. This will be called from the frontend to create a new user.
+        /// Registers a new user and sends an email verification link.
         /// </summary>
-        /// <param name="registerRequest"></param>
-        /// <returns></returns>
+        /// <param name="registerRequest">The registration request containing user's name, email, and password.</param>
+        /// <returns>
+        /// Returns an <see cref="OkObjectResult"/> with a <see cref="RegisterResponse"/> if registration is successful.
+        /// Returns <see cref="BadRequestObjectResult"/> if the email is already registered.
+        /// </returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
@@ -100,10 +111,14 @@ namespace UserService.Controllers
         }
 
         /// <summary>
-        /// Verify Email endpoint. This will be called when the user clicks the verification link in their email.
+        /// Verifies a user's email based on the verification token.
         /// </summary>
-        /// <param name="token"></param>
-        /// <returns>Returns a response message which will be displayed to user after clicking verification link received on email</returns>
+        /// <param name="email">The user's email address.</param>
+        /// <param name="token">The verification token sent to the user's email.</param>
+        /// <returns>
+        /// Returns <see cref="OkObjectResult"/> with a <see cref="RegisterResponse"/> if email verification succeeds.
+        /// Returns <see cref="BadRequestObjectResult"/> if the verification token is invalid or expired.
+        /// </returns>
         [HttpGet("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string email, [FromQuery] string token)
         {
@@ -132,7 +147,5 @@ namespace UserService.Controllers
 
             return Ok(new RegisterResponse { Message = "success: Email verified successfully." });
         }
-
-
     }
 }

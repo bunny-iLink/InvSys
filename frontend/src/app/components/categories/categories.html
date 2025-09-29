@@ -1,3 +1,4 @@
+<!-- Using "Confirm Component" wherever necessary -->
 <app-confirm
   [message]="confirmMessage"
   [show]="showConfirm"
@@ -5,6 +6,7 @@
   (cancelled)="onCancelDelete()"
 ></app-confirm>
 
+<!-- The loading screen. Rendered conditionally based on the "isLoading" flag -->
 <div
   *ngIf="isLoading"
   class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75"
@@ -19,13 +21,13 @@
   </div>
 </div>
 
-<!-- Header Row -->
+<!-- Header Row. Holds the page name and Add Category button (to add/create) a new category -->
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h2 class="fw-bold text-dark mb-0">Category Management</h2>
   <button class="btn btn-success" (click)="openModal()">+ Add Category</button>
 </div>
 
-<!-- User Table -->
+<!-- Category Table: Shows the categories available in the inventory, their status along with Edit and Delete buttons to perform respective actions -->
 <div class="card shadow-sm p-4">
   <div class="table-responsive">
     <table class="table table-bordered table-hover align-middle">
@@ -83,13 +85,14 @@
   </div>
 </div>
 
+<!-- Backdrop for the modal. Creates clickable overlay behind the modal -->
 <div
   *ngIf="isModalOpen"
   class="modal-backdrop fade show"
   (click)="closeModal()"
 ></div>
 
-<!-- Category Modal -->
+<!-- Category Modal: Contains the input form with necessary fields to create a category -->
 <div
   class="modal fade"
   tabindex="-1"

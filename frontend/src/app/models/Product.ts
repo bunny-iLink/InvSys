@@ -1,3 +1,4 @@
+// Product Model: Represents a product. Structure as per the TbProducts table
 export interface Product {
     productId: number;
     productName: string;

@@ -1,3 +1,4 @@
+// Angular imports
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -10,14 +11,17 @@ export class SalesOrderService {
 
   constructor(private http: HttpClient) {}
 
+  // Function to fetch all the orders placed by customers
   getAllOrders() {
     return this.http.get(`${this.apiUrl}/order/salesorder/getAllOrders`);
   }
 
+  // Function to create an order placed by a customer
   createSalesOrder(order: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/order/salesorder/neworder`, order);
   }
 
+  // Function to update the order placed by a customer
   updateSalesOrder(orderId: any, order: any): Observable<any> {
     return this.http.put(
       `${this.apiUrl}/order/salesorder/editorder/${orderId}`,
@@ -25,6 +29,7 @@ export class SalesOrderService {
     );
   }
 
+  // Function to delete an order placed by a customer
   deleteSalesOrder(orderId: any): Observable<any> {
     return this.http.delete(`${this.apiUrl}/order/salesorder/deleteorder/${orderId}`);
   }

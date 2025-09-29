@@ -4,13 +4,14 @@ import data from "../config/config.js";
 
 const router = express.Router();
 
+// Create a proxy middleware for product routes. Whenever the request corresponds to /api/products, redirect to product service running on PRODUCT_SERVICE_URL
 const productProxy = createProxyMiddleware({
-  target: data.PRODUCT_SERVICE_URL, // http://localhost:5052
+  target: data.PRODUCT_SERVICE_URL, 
   changeOrigin: true,
   pathRewrite: {
     "^/api/products": "/product",
   },
-  logLevel: "debug", // 👈 built-in detailed logging
+  logLevel: "debug", 
   onProxyReq: (proxyReq, req, res) => {
     console.log("[Gateway] Incoming URL:", req.originalUrl);
     console.log(

@@ -1,6 +1,8 @@
+// Imports
 import dotenv from 'dotenv';
 dotenv.config(); // Load environment variables from .env file
 
+// Create an object of environment variables
 const data = {
     PORT: process.env.PORT || 3000,
     USER_SERVICE_URL: process.env.USER_SERVICE_URL,

@@ -1,14 +1,17 @@
+// Angular imports
+import { finalize } from 'rxjs';
+import { Router } from '@angular/router';
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
+// Service imports
 import { Auth } from '../../services/auth';
-import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
 import { CustomToastService } from '../../services/toastr';
 
 @Component({
@@ -19,9 +22,10 @@ import { CustomToastService } from '../../services/toastr';
   styleUrls: ['./login.css'],
 })
 export class Login {
+  // Login form declaration
   loginForm: FormGroup;
-  loginError: string | null = null;
-  loginSuccess: string | null = null;
+
+  // Flags
   isLoading: boolean = false;
 
   constructor(
@@ -36,10 +40,9 @@ export class Login {
     });
   }
 
+  // Calls login function from auth service to request token and user data. Stores data in local storage after success
   onSubmit() {
     if (this.loginForm.valid) {
-      this.loginError = null;
-      this.loginSuccess = null;
       const { email, password } = this.loginForm.value;
       this.isLoading = true;
 
@@ -48,13 +51,9 @@ export class Login {
         .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: (response: any) => {
-            console.log('Login response:', response);
-
-            // The response itself is the user object
             const user = response;
             const role = user.role?.toLowerCase();
 
-            // Check if the customer is not verified
             if (user.Role === 'customer' && !user.IsVerified) {
               this.toast.showToast(
                 'Error',
@@ -62,10 +61,9 @@ export class Login {
                 'error',
                 3000
               );
-              return; // stop further execution
+              return; 
             }
 
-            // Store user in localStorage
             localStorage.setItem('user', JSON.stringify(user));
 
             this.toast.showToast(
@@ -75,7 +73,6 @@ export class Login {
               3000
             );
 
-            // Navigate dynamically based on role
             this.router.navigate([`/${role}/dashboard`]);
           },
           error: (err) => {

@@ -1,8 +1,11 @@
+// Angular imports
 import { Component, OnInit } from '@angular/core';
-import { Dashboard as DashboardService } from '../../services/dashboard';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
+// Service imports
+
+import { Dashboard as DashboardService } from '../../services/dashboard';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
@@ -10,21 +13,26 @@ import { Router } from '@angular/router';
   imports: [CommonModule],
 })
 export class Dashboard implements OnInit {
-  recentSalesOrders: any[] = [];
-  recentUserOrders: any[] = [];
+  // Variables to store data
   user: any;
-  recentPurchaseOrders: any[] = [];
   selectedOrder: any = null;
+  recentUserOrders: any[] = [];
+  recentSalesOrders: any[] = [];
+  recentPurchaseOrders: any[] = [];
   orderCounts = { ordered: 0, confirmed: 0, dispatched: 0 };
-  isCustomerModalOpen = false;
-  userCardData = { customers: 0, admins: 0, superadmins: 0 };
+  
+  // Counter variables
   productsCount = 0;
   lowProductsCount = 0;
   currentMonthSalesOrders = 0;
-  currentMonthSalesOrdersPending = 0;
   currentMonthPurchaseOrders = 0;
+  currentMonthSalesOrdersPending = 0;
   currentMonthPurchaseOrdersPending = 0;
-
+  userCardData = { customers: 0, admins: 0, superadmins: 0 };
+  
+  // Flags
+  isCustomerModalOpen = false;
+  
   constructor(
     private dashboardService: DashboardService,
     private router: Router
@@ -35,27 +43,31 @@ export class Dashboard implements OnInit {
       this.user = JSON.parse(localStorage.getItem('user') || '{}');
     }
 
+    // Fetch the dashboard data after component initializes
     this.getUserCounts();
     this.getOrderCounts();
     this.getProductsCount();
     this.getLowProductsCount();
     this.getRecentSalesOrders();
     this.getRecentPurchaseOrders();
+    this.getRecentSalesOrdersUser();
     this.getCurrentMonthSalesOrders();
     this.getCurrentMonthPurchaseOrders();
-    this.getRecentSalesOrdersUser();
   }
 
+  // Use angular router to navigate to a path
   navigateTo(path: string) {
     this.router.navigate([`${this.user.role}/${path}`]);
   }
 
+  // Retrives the count of the users as per role
   getUserCounts() {
     this.dashboardService.getUserCounts().subscribe((data) => {
       this.userCardData = data;
     });
   }
 
+  // Retrieves the current month sales orders
   getCurrentMonthSalesOrders() {
     this.dashboardService.getCurrentMonthSalesOrders().subscribe((data) => {
       console.log(data);
@@ -65,6 +77,7 @@ export class Dashboard implements OnInit {
     });
   }
 
+  // Retrieves current month purchases
   getCurrentMonthPurchaseOrders() {
     this.dashboardService.getCurrentMonthPurchaseOrders().subscribe((data) => {
       console.log(data);
@@ -74,24 +87,28 @@ export class Dashboard implements OnInit {
     });
   }
 
+  // Retrieves the total products available in the inventory
   getProductsCount() {
     this.dashboardService.getProductsCount().subscribe((data) => {
       this.productsCount = data.productsCount;
     });
   }
 
+  // Retrieves the count of the products low in stock
   getLowProductsCount() {
     this.dashboardService.getLowProductsCount().subscribe((data) => {
       this.lowProductsCount = data.lowProductsCount;
     });
   }
 
+  // Retrieves the recent orders placed by customers (all)
   getRecentSalesOrders() {
     this.dashboardService.getRecentSalesOrders().subscribe((data) => {
       this.recentSalesOrders = data;
     });
   }
 
+  // Retrieves the recent sales orders placed by a particular customer
   getRecentSalesOrdersUser() {
     this.dashboardService
       .getRecentSalesOrdersUser(this.user?.userId)
@@ -102,12 +119,14 @@ export class Dashboard implements OnInit {
       });
   }
 
+  // Retrieves recent purchases made by the inventory
   getRecentPurchaseOrders() {
     this.dashboardService
       .getRecentPurchaseOrders()
       .subscribe((data) => (this.recentPurchaseOrders = data));
   }
 
+  // Retrieves the number of orders placed by a customer and their status
   getOrderCounts() {
     if (this.user?.role === 'customer') {
       this.dashboardService
@@ -118,6 +137,7 @@ export class Dashboard implements OnInit {
     }
   }
 
+  // Function which opens a modal and displays an order
   viewOrder(orderId: string) {
     this.selectedOrder = this.recentSalesOrders.find(
       (order) => order.salesOrdersId === orderId

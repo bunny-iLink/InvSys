@@ -1,3 +1,4 @@
+// Angular imports
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 
@@ -5,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 export class CustomToastService {
   constructor(private toastr: ToastrService) {}
 
+  // Show toast function which takes subject, description, type and duration to show the toastr dialogue
   showToast(
     subject: string,
     description: string,
