@@ -39,9 +39,9 @@
   </button>
 </div>
 
-<!-- product Table -->
+<!-- Products table -->
 <div class="card shadow-sm p-4">
-  <div class="table-responsive">
+  <div class="table-responsive table-fixed-height">
     <table class="table table-bordered table-hover align-middle">
       <thead class="table-light">
         <tr>
@@ -51,7 +51,7 @@
           <th class="text-center">Price (in INR)</th>
           <th class="text-center">Stock Available</th>
           <th
-            *ngIf="user?.role === 'superadmin' ||user?.role === 'admin' || user?.role === 'employee'"
+            *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
             class="text-center"
           >
             SKU
@@ -60,7 +60,7 @@
           <th class="text-center">Mfg. On</th>
           <th class="text-center">Expiry Date</th>
           <th
-            *ngIf="user?.role === 'superadmin' ||user?.role === 'admin' || user?.role === 'employee'"
+            *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
             class="text-center"
           >
             Is Active
@@ -147,6 +147,38 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination -->
+  <nav
+    *ngIf="totalRecords > pageSize"
+    class="d-flex justify-content-center mt-3"
+  >
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="page === 1">
+        <button
+          class="page-link"
+          (click)="onPageChange(page - 1)"
+          [disabled]="page === 1"
+        >
+          Prev
+        </button>
+      </li>
+
+      <li class="page-item" *ngFor="let p of pages" [class.active]="page === p">
+        <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
+      </li>
+
+      <li class="page-item" [class.disabled]="page === pages.length">
+        <button
+          class="page-link"
+          (click)="onPageChange(page + 1)"
+          [disabled]="page === pages.length"
+        >
+          Next
+        </button>
+      </li>
+    </ul>
+  </nav>
 </div>
 
 <div
@@ -291,7 +323,30 @@
               class="form-control"
               formControlName="orderQuantity"
               min="1"
+              [max]="selectedProduct?.quantity ?? null"
             />
+
+            <!-- Validation errors -->
+            <div
+              *ngIf="
+      quantityForm.get('orderQuantity')?.touched &&
+      quantityForm.get('orderQuantity')?.invalid
+    "
+              class="text-danger small mt-1"
+            >
+              <span
+                *ngIf="quantityForm.get('orderQuantity')?.hasError('required')"
+              >
+                Quantity is required.
+              </span>
+              <span *ngIf="quantityForm.get('orderQuantity')?.hasError('min')">
+                Quantity must be at least 1.
+              </span>
+              <span *ngIf="quantityForm.get('orderQuantity')?.hasError('max')">
+                Quantity cannot exceed available stock ({{
+                selectedProduct?.quantity }}).
+              </span>
+            </div>
           </div>
         </form>
       </div>

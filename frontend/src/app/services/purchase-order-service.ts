@@ -12,8 +12,8 @@ export class PurchaseOrderService {
   constructor(private http: HttpClient) {}
 
   // Function to retrieve all the orders placed by inventory
-  getAllOrders() {
-    return this.http.get(`${this.apiUrl}/order/purchaseorder/getAllOrders`);
+  getAllOrders(pageNumber: number, pageSize: number) {
+    return this.http.get(`${this.apiUrl}/order/purchaseorder/getAllOrders?pageNumber=${pageNumber}&pageSize=${pageSize}`);
   }
 
   // Function to create a new order of a product to restock the inventory

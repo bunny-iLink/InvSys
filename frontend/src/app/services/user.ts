@@ -16,9 +16,15 @@ export class User {
     return this.http.get(`${this.apiUrl}/getUserById/${userId}`);
   }
 
+  getAllUsersNoPage(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/getAllUsers`);
+  }
+
   // Function to fetch all users
-  getAllUsers(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/getAllUsers`);
+  getAllUsers(pageNumber: number, pageSize: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/getAllUsers?pageNumber=${pageNumber}&pageSize=${pageSize}`
+    );
   }
 
   // Function to make a post request to add a user

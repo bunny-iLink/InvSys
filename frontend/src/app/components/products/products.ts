@@ -1,16 +1,23 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Product } from '../../models/Product';
-import { Product as ProductService } from '../../services/product';
-import { ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { CustomToastService } from '../../services/toastr';
-import { User } from '../../models/User';
-import { Category as CategoryService } from '../../services/category';
-import { Confirm } from '../confirm/confirm';
-import { PurchaseOrderService } from '../../services/purchase-order-service';
-import { SalesOrderService } from '../../services/sales-order-service';
+// Angular imports
 import { finalize } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+// Model imports
+import { User } from '../../models/User';
+import { Product } from '../../models/Product';
+
+// Service imports
+import { CustomToastService } from '../../services/toastr';
+import { Product as ProductService } from '../../services/product';
+import { Category as CategoryService } from '../../services/category';
+import { SalesOrderService } from '../../services/sales-order-service';
+import { PurchaseOrderService } from '../../services/purchase-order-service';
+
+// Custom component imports
+import { Confirm } from '../confirm/confirm';
 
 @Component({
   selector: 'app-products',
@@ -18,25 +25,36 @@ import { finalize } from 'rxjs';
   imports: [ReactiveFormsModule, CommonModule, Confirm],
 })
 export class Products implements OnInit {
+  // Variables to hold data
+  categories: any[] = [];
+  user: User | null = null;
   products: Product[] = [];
+  totalRecords: number = 0;
+  selectedDeleteProduct: number = 0;
+  selectedProduct: Product | null = null;
+
+  // Page variables
+  page: number = 1;
+  pages: number[] = [];
+  pageSize: number = 5;
+
+  // Form group
   productForm!: FormGroup;
   quantityForm!: FormGroup;
-  selectedProduct: Product | null = null;
-  modalTitle: string = 'Add Product';
-  isModalOpen: boolean = false;
-  user: User | null = null;
-  categories: any[] = [];
-  selectedDeleteProduct: number = 0;
-  confirmMessage = '';
-  showConfirm = false;
-  isQuantityModalOpen = false;
 
-  // Loading flags
-  isProductsLoading = false;
-  isCategoriesLoading = false;
-  isSubmitting = false;
+  // Message strings
+  modalTitle: string = 'Add Product';
+  confirmMessage = '';
+
+  // Flags
   isDeleting = false;
+  showConfirm = false;
+  isSubmitting = false;
   isOrderSubmitting = false;
+  isProductsLoading = false;
+  isQuantityModalOpen = false;
+  isCategoriesLoading = false;
+  isModalOpen: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -53,7 +71,7 @@ export class Products implements OnInit {
     }
 
     this.productForm = this.fb.group({
-      productId: [0], // required for edit
+      productId: [0],
       productName: ['', Validators.required],
       categoryId: [0, Validators.required],
       categoryName: [''],
@@ -90,15 +108,17 @@ export class Products implements OnInit {
     this.loadCategories();
   }
 
+  // Load all products page by page
   loadProducts() {
     this.isProductsLoading = true;
     this.productService
-      .getAllProducts()
+      .getAllProducts(this.page, this.pageSize)
       .pipe(finalize(() => (this.isProductsLoading = false)))
       .subscribe({
-        next: (data: Product[]) => {
-          this.products = data;
-          console.log(this.products);
+        next: (res) => {
+          this.products = res.data;
+          this.totalRecords = res.totalRecords;
+          this.updatePages();
         },
         error: () => {
           this.toast.showToast(
@@ -111,14 +131,27 @@ export class Products implements OnInit {
       });
   }
 
+  // Update pages as per navigation
+  updatePages() {
+    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  // Trigger refetch after page change
+  onPageChange(newPage: number) {
+    this.page = newPage;
+    this.loadProducts();
+  }
+
+  // Load categories for dropdown
   loadCategories() {
     this.isCategoriesLoading = true;
     this.categoryService
-      .getAllCategories()
+      .getAllCategoriesNoPage()
       .pipe(finalize(() => (this.isCategoriesLoading = false)))
       .subscribe({
-        next: (data) => {
-          this.categories = data;
+        next: (data: any) => {
+          this.categories = data.data;
         },
         error: () => {
           this.toast.showToast(
@@ -131,6 +164,7 @@ export class Products implements OnInit {
       });
   }
 
+  // Function to control modal display.
   openModal(product?: Product) {
     if (product) {
       this.modalTitle = 'Edit Product';
@@ -152,10 +186,26 @@ export class Products implements OnInit {
     this.isModalOpen = false;
   }
 
+  // Quantity modal handler
   openQuantityModal(product: any) {
     this.selectedProduct = product;
     this.isQuantityModalOpen = true;
-    this.quantityForm.reset({ orderQuantity: 1 });
+
+    this.quantityForm.reset({
+      orderQuantity: 1,
+    });
+
+    // apply validators dynamically
+    this.quantityForm
+      .get('orderQuantity')
+      ?.setValidators([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(product.quantity),
+      ]);
+
+    // re-calculate validity
+    this.quantityForm.get('orderQuantity')?.updateValueAndValidity();
   }
 
   closeQuantityModal() {
@@ -163,6 +213,7 @@ export class Products implements OnInit {
     this.selectedProduct = null;
   }
 
+  // Form submission to create or edit product details
   onSubmit() {
     if (this.productForm.invalid) return;
 
@@ -206,12 +257,14 @@ export class Products implements OnInit {
     });
   }
 
+  // Primary delete product function. Asks for confirmation in the frontend
   deleteProduct(productId: number) {
     this.selectedDeleteProduct = productId;
     this.confirmMessage = 'Are you sure to delete this product?';
     this.showConfirm = true;
   }
 
+  // Calls delete product service after frontend confirms the deletion
   onConfirmDelete() {
     this.isDeleting = true;
     this.productService
@@ -244,6 +297,7 @@ export class Products implements OnInit {
     this.resetConfirm();
   }
 
+  // Creates an order placed by inventory to restock
   confirmPurchaseOrder() {
     if (!this.selectedProduct || this.quantityForm.invalid) return;
 
@@ -280,6 +334,7 @@ export class Products implements OnInit {
       });
   }
 
+  // Creates an order created by a customer
   confirmSalesOrder() {
     if (!this.selectedProduct || this.quantityForm.invalid) return;
 

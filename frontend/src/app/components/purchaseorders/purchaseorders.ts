@@ -36,6 +36,12 @@ export class Purchaseorders implements OnInit {
   isUpdatingStatus = false;
   isDeleting = false;
 
+  // Page variables
+  page: number = 1;
+  pageSize: number = 5;
+  totalRecords: number = 0;
+  pages: number[] = [];
+
   user: any;
 
   constructor(
@@ -66,11 +72,11 @@ export class Purchaseorders implements OnInit {
   fetchProducts() {
     this.isProductsLoading = true;
     this.productService
-      .getAllProducts()
+      .getAllProductsNoPages()
       .pipe(finalize(() => (this.isProductsLoading = false)))
       .subscribe({
-        next: (res: Product[]) => {
-          this.products = res;
+        next: (res: any) => {
+          this.products = res.data;
         },
         error: () => {
           this.toastService.showToast(
@@ -87,11 +93,13 @@ export class Purchaseorders implements OnInit {
   fetchPurchaseOrders() {
     this.isOrdersLoading = true;
     this.purchaseOrderService
-      .getAllOrders()
+      .getAllOrders(this.page, this.pageSize)
       .pipe(finalize(() => (this.isOrdersLoading = false)))
       .subscribe({
         next: (res: any) => {
-          this.purchaseOrders = res as PurchaseOrder[];
+          this.purchaseOrders = res.data;
+          this.totalRecords = res.totalRecords;
+          this.updatePages();
         },
         error: () => {
           this.toastService.showToast(
@@ -102,6 +110,18 @@ export class Purchaseorders implements OnInit {
           );
         },
       });
+  }
+
+  updatePages() {
+    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  onPageChange(newPage: number) {
+    if (newPage >= 1 && newPage <= this.pages.length) {
+      this.page = newPage;
+      this.fetchPurchaseOrders();
+    }
   }
 
   openModal(order: PurchaseOrder | null = null) {

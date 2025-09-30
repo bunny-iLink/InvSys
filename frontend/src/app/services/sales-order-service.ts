@@ -12,8 +12,8 @@ export class SalesOrderService {
   constructor(private http: HttpClient) {}
 
   // Function to fetch all the orders placed by customers
-  getAllOrders() {
-    return this.http.get(`${this.apiUrl}/order/salesorder/getAllOrders`);
+  getAllOrders(pageNumber: number, pageSize: number) {
+    return this.http.get(`${this.apiUrl}/order/salesorder/getAllOrders?pageNumber=${pageNumber}&pageSize=${pageSize}`);
   }
 
   // Function to create an order placed by a customer

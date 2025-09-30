@@ -1,0 +1,25 @@
+.table-fixed-height {
+  max-height: 500px; /* Adjust as needed */
+  overflow-y: auto;
+  display: block;
+}
+
+.table-fixed-height table {
+  width: 100%;
+  border-collapse: separate; /* Required for block table scrolling */
+}
+
+.table-fixed-height thead,
+.table-fixed-height tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table-fixed-height thead {
+  width: calc(100% - 1em); /* Account for scrollbar */
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa; /* Same as table-light */
+  z-index: 2;
+}

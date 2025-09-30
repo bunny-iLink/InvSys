@@ -17,9 +17,16 @@ export class Category {
   }
 
   // Function to retrieve all categories
-  getAllCategories(): Observable<any> {
+  getAllCategoriesNoPage(): Observable<any> {
     return this.http.get(`${this.apiUrl}/product/category/getAllCategories`);
   }
+
+  getAllCategories(pageNumber: number, pageSize: number): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/product/category/getAllCategories?pageNumber=${pageNumber}&pageSize=${pageSize}`
+  );
+}
+
 
   // Function to send a post request to add a new category
   addCategory(categoryData: any): Observable<any> {

@@ -1,15 +1,22 @@
+// Angular imports
+import { finalize } from 'rxjs';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SalesOrderService } from '../../services/sales-order-service';
+
+// Service imports
+import { User as UserService } from '../../services/user';
+import { CustomToastService } from '../../services/toastr';
 import { Product as ProductService } from '../../services/product';
+import { SalesOrderService } from '../../services/sales-order-service';
+
+// Model imports
 import { Product } from '../../models/Product';
 import { SalesOrder } from '../../models/SalesOrder';
+
+// Custom component imports
 import { Confirm } from '../confirm/confirm';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { CustomToastService } from '../../services/toastr';
-import { User as UserService } from '../../services/user';
-import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-orders',
@@ -18,28 +25,37 @@ import { finalize } from 'rxjs';
   imports: [Confirm, CommonModule, ReactiveFormsModule, FormsModule],
 })
 export class Orders implements OnInit {
+  // Variables to store data
+  user: any;
+  customers: any[] = [];
   products: Product[] = [];
   salesOrders: SalesOrder[] = [];
-  customers: any[] = [];
+  deleteOrderId: number | null = null;
+  selectedOrder: SalesOrder | null = null;
+  
+  // Form group
   productForm!: FormGroup;
 
-  isModalOpen = false;
+  // Message variables
   modalTitle = 'Create Sales Order';
-  selectedOrder: SalesOrder | null = null;
-
-  showConfirm = false;
   confirmMessage = '';
-  deleteOrderId: number | null = null;
-
-  user: any;
-
+  
+  
   // Loading flags
+  isDeleting = false;
+  showConfirm = false;
+  isModalOpen = false;
+  isSubmitting = false;
+  isOrdersLoading = false;
+  isUpdatingStatus = false;
   isProductsLoading = false;
   isCustomersLoading = false;
-  isOrdersLoading = false;
-  isSubmitting = false;
-  isUpdatingStatus = false;
-  isDeleting = false;
+
+  // Page variables
+  page: number = 1;
+  pageSize: number = 5;
+  totalRecords: number = 0;
+  pages: number[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -60,6 +76,7 @@ export class Orders implements OnInit {
     this.fetchSalesOrders();
   }
 
+  // Initialize form
   initForm() {
     this.productForm = this.fb.group({
       productName: ['', Validators.required],
@@ -68,14 +85,15 @@ export class Orders implements OnInit {
     });
   }
 
+  // Function to fetch products
   fetchProducts() {
     this.isProductsLoading = true;
     this.productService
-      .getAllProducts()
+      .getAllProductsNoPages()
       .pipe(finalize(() => (this.isProductsLoading = false)))
       .subscribe({
-        next: (res: Product[]) => {
-          this.products = res;
+        next: (res: any) => {
+          this.products = res.data;
         },
         error: () => {
           this.toastService.showToast(
@@ -88,14 +106,15 @@ export class Orders implements OnInit {
       });
   }
 
+  // Fetch customers data
   fetchCustomers() {
     this.isCustomersLoading = true;
     this.userService
-      .getAllUsers()
+      .getAllUsersNoPage()
       .pipe(finalize(() => (this.isCustomersLoading = false)))
       .subscribe({
-        next: (res: any[]) => {
-          this.customers = res.filter((u) => u.role === 'customer');
+        next: (res: any) => {
+          this.customers = res.data.filter((u: any) => u.role === 'customer');
         },
         error: () => {
           this.toastService.showToast(
@@ -108,14 +127,15 @@ export class Orders implements OnInit {
       });
   }
 
+  // Fetch sales data
   fetchSalesOrders() {
     this.isOrdersLoading = true;
     this.salesOrderService
-      .getAllOrders()
+      .getAllOrders(this.page, this.pageSize)
       .pipe(finalize(() => (this.isOrdersLoading = false)))
       .subscribe({
         next: (res: any) => {
-          const mappedOrders = res.map((order: any) => ({
+          const mappedOrders = res.data.map((order: any) => ({
             salesOrderId: order.salesOrdersId,
             orderName: order.orderName,
             customerId: order.customerId,
@@ -129,6 +149,8 @@ export class Orders implements OnInit {
             lastUpdatedBy: order.lastUpdatedBy,
             lastUpdatedOn: order.lastUpdatedOn,
           }));
+          this.totalRecords = res.totalRecords;
+          this.updatePages();
 
           if (this.user?.role === 'customer') {
             this.salesOrders = mappedOrders.filter(
@@ -149,6 +171,21 @@ export class Orders implements OnInit {
       });
   }
 
+  // Update pages when navigating to different page number
+  updatePages() {
+    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  // Trigger refetch on changing page number
+  onPageChange(newPage: number) {
+    if (newPage >= 1 && newPage <= this.pages.length) {
+      this.page = newPage;
+      this.fetchSalesOrders();
+    }
+  }
+
+  // Modal control function. Used to open modal and show modal header based on the Create or Edit button
   openModal(order: SalesOrder | null = null) {
     this.isModalOpen = true;
     this.selectedOrder = order;
@@ -165,12 +202,14 @@ export class Orders implements OnInit {
     }
   }
 
+  // Close modal
   closeModal() {
     this.isModalOpen = false;
     this.selectedOrder = null;
     this.productForm.reset({ customerId: this.user?.userId || '' });
   }
 
+  // Form submission. Creates or Edits an order as per user actions
   onSubmit() {
     if (this.productForm.invalid) return;
 
@@ -236,6 +275,7 @@ export class Orders implements OnInit {
     });
   }
 
+  // Updates the status of an order like Ordered, Confirmed, etc
   updateStatus(order: SalesOrder, newStatus: string) {
     this.isUpdatingStatus = true;
 
@@ -270,12 +310,14 @@ export class Orders implements OnInit {
       });
   }
 
+  // Primary delete sales order function. Asks for confirmation from the user
   deleteSalesOrder(orderId: number) {
     this.deleteOrderId = orderId;
     this.confirmMessage = 'Are you sure you want to delete this order?';
     this.showConfirm = true;
   }
 
+  // Main logic to delete an order. Calls delete service if confirmed from the frontend
   onConfirmDelete() {
     if (this.deleteOrderId === null) return;
 

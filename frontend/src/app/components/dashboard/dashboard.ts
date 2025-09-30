@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 // Service imports
-
 import { Dashboard as DashboardService } from '../../services/dashboard';
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',

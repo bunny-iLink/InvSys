@@ -17,14 +17,28 @@ namespace ProductService.Controllers
         }
 
         /// <summary>
-        /// Retrieves all categories from the database.
+        /// Retrieves paginated categories from the database.
         /// </summary>
-        /// <returns>A list of <see cref="Category"/> objects.</returns>
+        /// <param name="pageNumber">Current page number (default = 1)</param>
+        /// <param name="pageSize">Number of items per page (default = 10)</param>
         [HttpGet("getAllCategories")]
-        public async Task<IActionResult> GetAllCategories()
+        public async Task<IActionResult> GetAllCategories(int pageNumber = 1, int pageSize = 10)
         {
-            var categories = await _context.Categories.ToListAsync();
-            return Ok(categories);
+            var totalRecords = await _context.Categories.CountAsync();
+
+            var categories = await _context.Categories
+                .OrderBy(c => c.CategoryId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                Data = categories,
+                TotalRecords = totalRecords,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
 
         /// <summary>

@@ -17,8 +17,17 @@ export class Product {
   }
 
   // Fetch data of all the products
-  getAllProducts(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/product/getAllProducts`);
+  getAllProductsNoPages(): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/product/getAllProducts`
+    );
+  }
+
+  // Fetch data of all the products
+  getAllProducts(pageNumber: number, pageSize: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/product/getAllProducts?pageNumber=${pageNumber}&pageSize=${pageSize}`
+    );
   }
 
   // Add a product in the inventory
@@ -28,11 +37,16 @@ export class Product {
 
   // Update existing product in the inventory based on productId
   updateProduct(productId: number, productData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/product/updateProduct/${productId}`, productData);
+    return this.http.put(
+      `${this.apiUrl}/product/updateProduct/${productId}`,
+      productData
+    );
   }
 
   // Delete an already existing product as per the productId
   deleteProduct(productId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/product/deleteProduct/${productId}`);
+    return this.http.delete(
+      `${this.apiUrl}/product/deleteProduct/${productId}`
+    );
   }
 }

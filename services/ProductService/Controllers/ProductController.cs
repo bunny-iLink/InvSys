@@ -17,14 +17,29 @@ namespace ProductService.Controllers
         }
 
         /// <summary>
-        /// Retrieves all products from the database.
+        /// Retrieves paginated products from the database.
         /// </summary>
-        /// <returns>A list of <see cref="Product"/> objects.</returns>
+        /// <param name="pageNumber">Current page number (default = 1)</param>
+        /// <param name="pageSize">Number of items per page (default = 10)</param>
+        /// <returns>A paginated list of products.</returns>
         [HttpGet("getAllProducts")]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts(int pageNumber = 1, int pageSize = 10)
         {
-            var products = await _context.Products.ToListAsync();
-            return Ok(products);
+            var totalRecords = await _context.Products.CountAsync();
+
+            var products = await _context.Products
+                .OrderBy(p => p.ProductId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                Data = products,
+                TotalRecords = totalRecords,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
 
         /// <summary>

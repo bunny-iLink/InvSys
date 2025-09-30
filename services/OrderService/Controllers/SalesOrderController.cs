@@ -30,10 +30,21 @@ namespace OrderService.Controllers
         /// Returns an empty list if no sales orders exist.
         /// </returns>
         [HttpGet("getAllOrders")]
-        public async Task<IActionResult> GetAllOrders()
+        public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 10)
         {
-            var orders = await _context.SalesOrders.ToListAsync();
-            return Ok(orders);
+            var totalRecords = await _context.SalesOrders.CountAsync();
+
+            var orders = await _context.SalesOrders.Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+            return Ok(new
+            {
+                Data = orders,
+                TotalRecords = totalRecords,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
 
         /// <summary>

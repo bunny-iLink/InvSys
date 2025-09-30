@@ -31,6 +31,12 @@ export class Categories implements OnInit {
   userMap: { [key: string]: string } = {};
   selectedCategoryDelete: number = 0;
 
+  // Page variables
+  page: number = 1;
+  pages: number[] = [];
+  pageSize: number = 5;
+  totalRecords: number = 0;
+
   // Display messages
   modalTitle: string = 'Add Category';
   confirmMessage = '';
@@ -71,11 +77,11 @@ export class Categories implements OnInit {
     this.isUsersLoading = true;
 
     this.userService
-      .getAllUsers()
+      .getAllUsersNoPage()
       .pipe(finalize(() => (this.isUsersLoading = false)))
       .subscribe({
-        next: (data) => {
-          this.users = data;
+        next: (data: any) => {
+          this.users = data.data;
           this.userMap = this.users.reduce((acc: any, user: any) => {
             acc[user.userId.toString()] =
               `${user.firstName} ${user.lastName}`.trim();
@@ -95,11 +101,11 @@ export class Categories implements OnInit {
   loadCategories() {
     this.isCategoriesLoading = true;
     this.categoryService
-      .getAllCategories()
+      .getAllCategories(this.page, this.pageSize)
       .pipe(finalize(() => (this.isCategoriesLoading = false)))
       .subscribe({
-        next: (data: Category[]) => {
-          this.categories = data.map((cat) => ({
+        next: (res) => {
+          this.categories = res.data.map((cat: any) => ({
             ...cat,
             createdByName:
               cat.createdBy !== undefined
@@ -110,6 +116,8 @@ export class Categories implements OnInit {
                 ? this.userMap[cat.lastUpdatedBy.toString()] || 'Unknown'
                 : 'Unknown',
           }));
+          this.totalRecords = res.totalRecords;
+          this.updatePages();
         },
         error: () => {
           this.toast.showToast(
@@ -120,6 +128,18 @@ export class Categories implements OnInit {
           );
         },
       });
+  }
+
+  updatePages() {
+    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  onPageChange(newPage: number) {
+    if (newPage >= 1 && newPage <= this.pages.length) {
+      this.page = newPage;
+      this.loadCategories();
+    }
   }
 
   // Open Modal function: Handles the opening and closing of modal and display title based on Add/Edit call. Patch form for Add/Edit operations

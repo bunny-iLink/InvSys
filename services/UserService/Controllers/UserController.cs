@@ -29,18 +29,25 @@ namespace UserService.Controllers
         /// </summary>
         /// <returns>An <see cref="OkObjectResult"/> containing a list of users.</returns>
         [HttpGet("getAllUsers")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers(int pageNumber = 1, int pageSize = 10)
         {
-            var users = await _context.Users
-                .Where(u => u.Role != "superadmin")
+            var query = _context.Users.Where(u => u.Role != "superadmin");
+
+            var totalRecords = await query.CountAsync();
+
+            var users = await query
+                .OrderBy(u => u.UserId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            foreach (var u in users)
+            return Ok(new
             {
-                Console.WriteLine($"UserId={u.UserId}, IsVerified={u.IsVerified}, IsActive={u.IsActive}");
-            }
-
-            return Ok(users);
+                Data = users,
+                TotalRecords = totalRecords,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
 
         /// <summary>

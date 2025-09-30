@@ -24,6 +24,12 @@ export class Users implements OnInit {
   selectedDeleteUser = 0;
   isLoading = false;
 
+  // Page variables
+  page: number = 1;
+  pageSize: number = 5;
+  totalRecords: number = 0;
+  pages: number[] = [];
+
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
@@ -47,24 +53,30 @@ export class Users implements OnInit {
   loadUsers() {
     this.isLoading = true;
     this.userService
-      .getAllUsers()
+      .getAllUsers(this.page, this.pageSize)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (data: User[]) => {
-          this.users = data.map((user) => ({ ...user, password: '' }));
-          console.log('Users: ', this.users);
-
-          // this.toast.showToast(
-          //   'Success',
-          //   'Users fetched successfully',
-          //   'success',
-          //   3000
-          // );
+        next: (res) => {
+          this.users = res.data.map((user: any) => ({ ...user, password: '' }));
+          this.totalRecords = res.totalRecords;
+          this.updatePages();
         },
-        error: (err) => {
+        error: () => {
           this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
         },
       });
+  }
+
+  updatePages() {
+    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  onPageChange(newPage: number) {
+    if (newPage >= 1 && newPage <= this.pages.length) {
+      this.page = newPage;
+      this.loadUsers();
+    }
   }
 
   openModal(user?: User) {

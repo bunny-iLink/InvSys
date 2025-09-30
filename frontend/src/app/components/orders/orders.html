@@ -1,3 +1,4 @@
+<!-- Using Confirm component -->
 <app-confirm
   [message]="confirmMessage"
   [show]="showConfirm"
@@ -5,6 +6,7 @@
   (cancelled)="onCancelDelete()"
 ></app-confirm>
 
+<!-- Loading Spinner -->
 <div
   *ngIf="isLoading"
   class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75"
@@ -101,6 +103,38 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination -->
+  <nav
+    *ngIf="totalRecords > pageSize"
+    class="d-flex justify-content-center mt-3"
+  >
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="page === 1">
+        <button
+          class="page-link"
+          (click)="onPageChange(page - 1)"
+          [disabled]="page === 1"
+        >
+          Prev
+        </button>
+      </li>
+
+      <li class="page-item" *ngFor="let p of pages" [class.active]="page === p">
+        <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
+      </li>
+
+      <li class="page-item" [class.disabled]="page === pages.length">
+        <button
+          class="page-link"
+          (click)="onPageChange(page + 1)"
+          [disabled]="page === pages.length"
+        >
+          Next
+        </button>
+      </li>
+    </ul>
+  </nav>
 </div>
 
 <div

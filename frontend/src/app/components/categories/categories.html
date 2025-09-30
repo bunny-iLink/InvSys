@@ -27,7 +27,6 @@
   <button class="btn btn-success" (click)="openModal()">+ Add Category</button>
 </div>
 
-<!-- Category Table: Shows the categories available in the inventory, their status along with Edit and Delete buttons to perform respective actions -->
 <div class="card shadow-sm p-4">
   <div class="table-responsive">
     <table class="table table-bordered table-hover align-middle">
@@ -36,14 +35,12 @@
           <th class="text-center">#</th>
           <th class="text-center">Category Name</th>
           <th class="text-center">Active</th>
-          <!-- <th class="text-center">Created By</th>
-          <th class="text-center">Last Updated By</th> -->
           <th class="text-center">Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let category of categories; let i = index">
-          <td class="text-center">{{ i + 1 }}</td>
+          <td class="text-center">{{ (page - 1) * pageSize + i + 1 }}</td>
           <td class="text-center">{{ category.categoryName }}</td>
           <td class="text-center">
             <span
@@ -52,16 +49,6 @@
               {{ category.isActive ? 'Yes' : 'No' }}
             </span>
           </td>
-          <!-- <td class="text-center">
-            {{ category.createdBy !== undefined ?
-            (userMap[category.createdBy.toString()] || 'Unknown') : 'Unknown' }}
-          </td>
-          <td class="text-center">
-            {{ category.lastUpdatedBy !== undefined ?
-            (userMap[category.lastUpdatedBy.toString()] || 'Unknown') :
-            'Unknown' }}
-          </td> -->
-
           <td class="d-flex justify-content-center align-items-center">
             <button
               class="btn btn-sm btn-primary me-2"
@@ -78,11 +65,43 @@
           </td>
         </tr>
         <tr *ngIf="categories.length === 0">
-          <td colspan="8" class="text-center">No categories found.</td>
+          <td colspan="4" class="text-center">No categories found.</td>
         </tr>
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination Controls -->
+  <nav
+    *ngIf="totalRecords > pageSize"
+    class="d-flex justify-content-center mt-3"
+  >
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="page === 1">
+        <button
+          class="page-link"
+          (click)="onPageChange(page - 1)"
+          [disabled]="page === 1"
+        >
+          Prev
+        </button>
+      </li>
+
+      <li class="page-item" *ngFor="let p of pages" [class.active]="page === p">
+        <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
+      </li>
+
+      <li class="page-item" [class.disabled]="page === pages.length">
+        <button
+          class="page-link"
+          (click)="onPageChange(page + 1)"
+          [disabled]="page === pages.length"
+        >
+          Next
+        </button>
+      </li>
+    </ul>
+  </nav>
 </div>
 
 <!-- Backdrop for the modal. Creates clickable overlay behind the modal -->
