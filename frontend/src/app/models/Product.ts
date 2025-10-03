@@ -13,4 +13,5 @@ export interface Product {
     lastUpdatedBy: number | null;
     manufacturer: string | null;
     sku: string | null;
+    minStockLevel: number | null;
 }

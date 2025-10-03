@@ -109,6 +109,7 @@ namespace ProductService.Controllers
             existingProduct.CategoryId = updatedProduct.CategoryId;
             existingProduct.Price = updatedProduct.Price;
             existingProduct.Quantity = updatedProduct.Quantity;
+            existingProduct.MinStockLevel = updatedProduct.MinStockLevel;
             existingProduct.MfgOn = updatedProduct.MfgOn;
             existingProduct.ExpiryDate = updatedProduct.ExpiryDate;
             existingProduct.IsActive = updatedProduct.IsActive;

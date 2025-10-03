@@ -38,7 +38,7 @@ namespace ProductService.Controllers
         public async Task<IActionResult> GetLowProductsCount()
         {
             // Get products with quantity less than 21
-            var lowProductsCount = await _context.Products.CountAsync(p => p.Quantity < 21);
+            var lowProductsCount = await _context.Products.CountAsync(p => p.Quantity <= p.MinStockLevel);
             return Ok(new
             {
                 lowProductsCount

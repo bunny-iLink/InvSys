@@ -124,6 +124,14 @@ export class Products implements OnInit {
           Validators.pattern(/^[0-9]+$/),
         ],
       ],
+      minStockLevel: [
+        '',
+        [
+          Validators.required,
+          Validators.min(0),
+          Validators.pattern(/^[0-9]+$/),
+        ],
+      ],
       mfgOn: [''],
       expiryDate: [''],
       isActive: [true],
@@ -277,6 +285,7 @@ export class Products implements OnInit {
       lastUpdatedBy: this.user?.userId || null,
       manufacturer: this.productForm.value.manufacturer,
       sku: this.productForm.value.sku,
+      minStockLevel: this.productForm.value.minStockLevel,
     };
 
     const request$ = this.selectedProduct

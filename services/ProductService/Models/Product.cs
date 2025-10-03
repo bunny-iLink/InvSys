@@ -28,5 +28,6 @@ namespace ProductService.Models
         public DateTime CreatedOn { get; set; }
         public DateTime LastUpdatedOn { get; set; }
         public string CategoryName { get; set; } = string.Empty;
+        public int? MinStockLevel { get; set; }
     }
 }
