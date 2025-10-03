@@ -20,7 +20,7 @@
 </div>
 
 <!-- Header Row -->
-<div class="d-flex align-items-center justify-content-between mb-3">
+<div class="d-flex align-items-center justify-content-between mb-3 mt-3" style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px);">
   <h2
     *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
     class="fw-bold text-dark mb-0"
@@ -39,7 +39,7 @@
   </button>
 </div>
 
-<div class="card shadow-sm p-4">
+<div class="card shadow-sm p-4" style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px);">
   <!-- Table -->
   <div class="table-responsive table-fixed-height">
     <table

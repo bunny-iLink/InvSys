@@ -22,12 +22,12 @@
 </div>
 
 <!-- Header Row. Holds the page name and Add Category button (to add/create) a new category -->
-<div class="d-flex align-items-center justify-content-between mb-3">
+<div class="d-flex align-items-center justify-content-between mb-3 mt-3" style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px);">
   <h2 class="fw-bold text-dark mb-0">Category Management</h2>
   <button class="btn btn-success" (click)="openModal()">+ Add Category</button>
 </div>
 
-<div class="card shadow-sm p-4">
+<div class="card shadow-sm p-4" style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px);">
   <div class="table-responsive table-fixed-height">
     <table mat-table [dataSource]="categories" class="full-width-table">
       <!-- Index -->

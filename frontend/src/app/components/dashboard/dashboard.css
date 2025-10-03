@@ -10,8 +10,14 @@
 
 /* Scrollable content area */
 .dashboard-content {
-  flex: 1; /* take remaining space after fixed header/menu */
+  flex: 1;
+  overflow-x: auto; /* horizontal scroll only inside this div */
   overflow-y: auto; /* vertical scroll */
-  padding: 1rem; /* optional padding */
+  padding: 1rem;
   padding-bottom: 80px;
+}
+
+/* Optional: prevent content from wrapping */
+.dashboard-content > .container-fluid {
+  min-width: 1200px; /* or whatever width is needed */
 }
