@@ -2,7 +2,7 @@
 import { finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 // Model imports
@@ -19,24 +19,57 @@ import { PurchaseOrderService } from '../../services/purchase-order-service';
 // Custom component imports
 import { Confirm } from '../confirm/confirm';
 
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
 @Component({
   selector: 'app-products',
   templateUrl: './products.html',
-  imports: [ReactiveFormsModule, CommonModule, Confirm],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    CommonModule,
+    Confirm,
+    MatTableModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
 })
 export class Products implements OnInit {
   // Variables to hold data
   categories: any[] = [];
   user: User | null = null;
   products: Product[] = [];
-  totalRecords: number = 0;
   selectedDeleteProduct: number = 0;
   selectedProduct: Product | null = null;
+  Math = Math;
 
   // Page variables
   page: number = 1;
-  pages: number[] = [];
   pageSize: number = 5;
+  pageSizeInput: number = this.pageSize;
+  inputPage: number = 1; // for custom page number input
+  totalRecords: number = 0;
+  displayedColumns: string[] = [
+    'index',
+    'productName',
+    'category',
+    'price',
+    'quantity',
+    'sku',
+    'manufacturer',
+    'mfgOn',
+    'expiryDate',
+    'isActive',
+    'actions',
+  ];
 
   // Form group
   productForm!: FormGroup;
@@ -118,7 +151,6 @@ export class Products implements OnInit {
         next: (res) => {
           this.products = res.data;
           this.totalRecords = res.totalRecords;
-          this.updatePages();
         },
         error: () => {
           this.toast.showToast(
@@ -131,15 +163,28 @@ export class Products implements OnInit {
       });
   }
 
-  // Update pages as per navigation
-  updatePages() {
+  // Page change buttons
+  onPageChange(newPage: number) {
+    if (newPage < 1) return;
     const totalPages = Math.ceil(this.totalRecords / this.pageSize);
-    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (newPage > totalPages) return;
+    this.page = newPage;
+    this.inputPage = newPage;
+    this.loadProducts();
   }
 
-  // Trigger refetch after page change
-  onPageChange(newPage: number) {
-    this.page = newPage;
+  // Custom page number input
+  goToPage() {
+    const page = Math.floor(this.inputPage);
+    this.onPageChange(page);
+  }
+
+  // Custom page size input
+  onPageSizeChange() {
+    if (this.pageSizeInput < 1) this.pageSizeInput = 1;
+    this.pageSize = this.pageSizeInput;
+    this.page = 1;
+    this.inputPage = 1;
     this.loadProducts();
   }
 

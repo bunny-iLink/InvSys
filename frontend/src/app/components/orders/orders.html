@@ -44,97 +44,160 @@
 <!-- Sales Orders Table -->
 <div class="card shadow-sm p-4">
   <div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th class="text-center">#</th>
-          <th class="text-center">Order Name</th>
-          <th class="text-center">Customer Name</th>
-          <th class="text-center">Product Name</th>
-          <th class="text-center">Quantity</th>
-          <th class="text-center">Status</th>
-          <th class="text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of salesOrders; let i = index">
-          <td class="text-center">{{ i + 1 }}</td>
-          <td class="text-center">{{ order.orderName }}</td>
-          <td class="text-center">{{ order.customerName }}</td>
-          <td class="text-center">{{ order.productName }}</td>
-          <td class="text-center">{{ order.quantity }}</td>
-          <td class="text-center">
-            <select
-              class="form-select form-select-sm"
-              [(ngModel)]="order.status"
-              (ngModelChange)="updateStatus(order, $event)"
-              [disabled]="user?.role === 'customer'"
-            >
-              <option [disabled]="order.status === 'Confirmed'" value="Ordered">
-                Ordered
-              </option>
-              <option
-                [disabled]="order.status === 'Confirmed'"
-                value="Confirmed"
-              >
-                Confirmed
-              </option>
-              <option value="Dispatched">Dispatched</option>
-            </select>
-          </td>
-          <td class="d-flex justify-content-center align-items-center">
-            <button
-              class="btn btn-sm btn-primary me-2"
-              (click)="openModal(order)"
-            >
-              <i class="bi bi-pencil-fill"></i>
+    <table
+      mat-table
+      [dataSource]="salesOrders"
+      class="mat-elevation-z8 full-width-table"
+    >
+      <!-- Index Column -->
+      <ng-container matColumnDef="index">
+        <th mat-header-cell *matHeaderCellDef class="text-center">#</th>
+        <td mat-cell *matCellDef="let order; let i = index" class="text-center">
+          {{ i + 1 }}
+        </td>
+      </ng-container>
+
+      <!-- Order Name -->
+      <ng-container matColumnDef="orderName">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Order Name
+        </th>
+        <td mat-cell *matCellDef="let order; let i = index" class="text-center">
+          {{ order.orderName }}
+        </td>
+      </ng-container>
+
+      <!-- Customer Name -->
+      <ng-container matColumnDef="customerName">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Customer Name
+        </th>
+        <td mat-cell *matCellDef="let order; let i = index" class="text-center">
+          {{ order.customerName }}
+        </td>
+      </ng-container>
+
+      <!-- Product Name -->
+      <ng-container matColumnDef="productName">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Product Name
+        </th>
+        <td mat-cell *matCellDef="let order; let i = index" class="text-center">
+          {{ order.productName }}
+        </td>
+      </ng-container>
+
+      <!-- Quantity -->
+      <ng-container matColumnDef="quantity">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Quantity</th>
+        <td mat-cell *matCellDef="let order; let i = index" class="text-center">
+          {{ order.quantity }}
+        </td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Status</th>
+        <td mat-cell *matCellDef="let order; let i = index" class="text-center">
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="order.status"
+            (ngModelChange)="updateStatus(order, $event)"
+            [disabled]="user?.role === 'customer'"
+          >
+            <option [disabled]="order.status === 'Confirmed'" value="Ordered">
+              Ordered
+            </option>
+            <option [disabled]="order.status === 'Confirmed'" value="Confirmed">
+              Confirmed
+            </option>
+            <option value="Dispatched">Dispatched</option>
+          </select>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+        <td
+          mat-cell
+          *matCellDef="let order"
+          class="text-center"
+          style="flex-wrap: nowrap; gap: 8px"
+        >
+          <!-- Admin buttons -->
+          <ng-container>
+            <button mat-icon-button color="primary" (click)="openModal(order)">
+              <mat-icon>edit</mat-icon>
             </button>
             <button
-              class="btn btn-sm btn-danger"
+              mat-icon-button
+              color="warn"
               (click)="deleteSalesOrder(order.salesOrderId)"
             >
-              <i class="bi bi-trash3-fill"></i>
+              <mat-icon>delete</mat-icon>
             </button>
-          </td>
-        </tr>
-        <tr *ngIf="salesOrders.length === 0">
-          <td colspan="7" class="text-center">No orders found.</td>
-        </tr>
-      </tbody>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <!-- Header and Row Declarations -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let order; columns: displayedColumns;"></tr>
+
+      <!-- No Products Found -->
+      <tr *ngIf="salesOrders.length === 0">
+        <td [attr.colspan]="displayedColumns.length" class="text-center">
+          No orders found.
+        </td>
+      </tr>
     </table>
   </div>
 
-  <!-- Pagination -->
-  <nav
-    *ngIf="totalRecords > pageSize"
-    class="d-flex justify-content-center mt-3"
-  >
-    <ul class="pagination">
-      <li class="page-item" [class.disabled]="page === 1">
-        <button
-          class="page-link"
-          (click)="onPageChange(page - 1)"
-          [disabled]="page === 1"
-        >
-          Prev
-        </button>
-      </li>
+  <!-- Pagination Controls -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <!-- Rows per page input -->
+    <div class="d-flex align-items-center gap-2">
+      <label>Rows per page:</label>
+      <input
+        type="number"
+        min="1"
+        [(ngModel)]="pageSizeInput"
+        (keyup.enter)="onPageSizeChange()"
+        (blur)="onPageSizeChange()"
+        class="form-control"
+        style="width: 80px"
+      />
+    </div>
 
-      <li class="page-item" *ngFor="let p of pages" [class.active]="page === p">
-        <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
-      </li>
-
-      <li class="page-item" [class.disabled]="page === pages.length">
-        <button
-          class="page-link"
-          (click)="onPageChange(page + 1)"
-          [disabled]="page === pages.length"
-        >
-          Next
-        </button>
-      </li>
-    </ul>
-  </nav>
+    <!-- Page navigation -->
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-sm btn-outline-primary"
+        (click)="onPageChange(page - 1)"
+        [disabled]="page === 1"
+      >
+        Prev
+      </button>
+      <input
+        type="number"
+        min="1"
+        [max]="Math.ceil(totalRecords / pageSize)"
+        [(ngModel)]="inputPage"
+        (keyup.enter)="goToPage()"
+        (blur)="goToPage()"
+        class="form-control"
+        style="width: 60px"
+      />
+      / {{ Math.ceil(totalRecords / pageSize) }}
+      <button
+        class="btn btn-sm btn-outline-primary"
+        (click)="onPageChange(page + 1)"
+        [disabled]="page === Math.ceil(totalRecords / pageSize)"
+      >
+        Next
+      </button>
+    </div>
+  </div>
 </div>
 
 <div

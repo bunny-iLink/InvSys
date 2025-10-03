@@ -3,7 +3,7 @@ import { finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 
 // Model imports
 import { User } from '../../models/User';
@@ -17,10 +17,28 @@ import { Category as CategoryService } from '../../services/category';
 // Custom component imports
 import { Confirm } from '../confirm/confirm';
 
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
 @Component({
   selector: 'app-categories',
   templateUrl: './categories.html',
-  imports: [ReactiveFormsModule, CommonModule, Confirm],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    Confirm,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
 })
 export class Categories implements OnInit {
   // Variables to store data
@@ -33,9 +51,18 @@ export class Categories implements OnInit {
 
   // Page variables
   page: number = 1;
-  pages: number[] = [];
   pageSize: number = 5;
+  pageSizeInput: number = this.pageSize;
+  inputPage: number = 1; // for custom page number input
   totalRecords: number = 0;
+  displayedColumns: string[] = [
+    'index',
+    'categoryName',
+    'createdByName',
+    'lastUpdatedByName',
+    'isActive',
+    'actions',
+  ];
 
   // Display messages
   modalTitle: string = 'Add Category';
@@ -44,6 +71,7 @@ export class Categories implements OnInit {
   // Category form
   categoryForm!: FormGroup;
 
+  Math = Math;
   // Flags
   isDeleting = false;
   showConfirm = false;
@@ -116,8 +144,9 @@ export class Categories implements OnInit {
                 ? this.userMap[cat.lastUpdatedBy.toString()] || 'Unknown'
                 : 'Unknown',
           }));
+          console.log('Categories: ', this.categories);
+          
           this.totalRecords = res.totalRecords;
-          this.updatePages();
         },
         error: () => {
           this.toast.showToast(
@@ -130,16 +159,29 @@ export class Categories implements OnInit {
       });
   }
 
-  updatePages() {
+  // Page change buttons
+  onPageChange(newPage: number) {
+    if (newPage < 1) return;
     const totalPages = Math.ceil(this.totalRecords / this.pageSize);
-    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (newPage > totalPages) return;
+    this.page = newPage;
+    this.inputPage = newPage;
+    this.loadCategories();
   }
 
-  onPageChange(newPage: number) {
-    if (newPage >= 1 && newPage <= this.pages.length) {
-      this.page = newPage;
-      this.loadCategories();
-    }
+  // Custom page number input
+  goToPage() {
+    const page = Math.floor(this.inputPage);
+    this.onPageChange(page);
+  }
+
+  // Custom page size input
+  onPageSizeChange() {
+    if (this.pageSizeInput < 1) this.pageSizeInput = 1;
+    this.pageSize = this.pageSizeInput;
+    this.page = 1;
+    this.inputPage = 1;
+    this.loadCategories();
   }
 
   // Open Modal function: Handles the opening and closing of modal and display title based on Add/Edit call. Patch form for Add/Edit operations

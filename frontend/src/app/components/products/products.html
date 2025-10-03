@@ -39,146 +39,249 @@
   </button>
 </div>
 
-<!-- Products table -->
 <div class="card shadow-sm p-4">
+  <!-- Table -->
   <div class="table-responsive table-fixed-height">
-    <table class="table table-bordered table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th class="text-center">#</th>
-          <th class="text-center">Product Name</th>
-          <th class="text-center">Category</th>
-          <th class="text-center">Price (in INR)</th>
-          <th class="text-center">Stock Available</th>
-          <th
+    <table
+      mat-table
+      [dataSource]="products"
+      class="mat-elevation-z8 full-width-table"
+    >
+      <!-- Index Column -->
+      <ng-container matColumnDef="index">
+        <th mat-header-cell *matHeaderCellDef class="text-center">#</th>
+        <td
+          mat-cell
+          *matCellDef="let product; let i = index"
+          class="text-center"
+        >
+          {{ i + 1 }}
+        </td>
+      </ng-container>
+
+      <!-- Product Name -->
+      <ng-container matColumnDef="productName">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Product Name
+        </th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          {{ product.productName }}
+        </td>
+      </ng-container>
+
+      <!-- Category -->
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Category</th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          {{ product.categoryName }}
+        </td>
+      </ng-container>
+
+      <!-- Price -->
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Price (INR)
+        </th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          {{ product.price }}
+        </td>
+      </ng-container>
+
+      <!-- Quantity -->
+      <ng-container matColumnDef="quantity">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Stock Available
+        </th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          {{ product.quantity }}
+        </td>
+      </ng-container>
+
+      <!-- SKU (role-based) -->
+      <ng-container matColumnDef="sku">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          <ng-container
             *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
-            class="text-center"
           >
             SKU
-          </th>
-          <th class="text-center">Manufacturer</th>
-          <th class="text-center">Mfg. On</th>
-          <th class="text-center">Expiry Date</th>
-          <th
+          </ng-container>
+        </th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          <ng-container
             *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
-            class="text-center"
+          >
+            {{ product.sku }}
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <!-- Manufacturer -->
+      <ng-container matColumnDef="manufacturer">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Manufacturer
+        </th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          {{ product.manufacturer }}
+        </td>
+      </ng-container>
+
+      <!-- Mfg. On -->
+      <ng-container matColumnDef="mfgOn">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Mfg. On</th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          {{ product.mfgOn }}
+        </td>
+      </ng-container>
+
+      <!-- Expiry Date -->
+      <ng-container matColumnDef="expiryDate">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          Expiry Date
+        </th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          {{ product.expiryDate }}
+        </td>
+      </ng-container>
+
+      <!-- Is Active (role-based) -->
+      <ng-container matColumnDef="isActive">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          <ng-container
+            *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
           >
             Is Active
-          </th>
-          <th class="text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let product of products; let i = index;">
-          <td class="text-center">{{ i + 1 }}</td>
-          <td class="text-center">{{ product.productName }}</td>
-          <td class="text-center">{{ product.categoryName }}</td>
-          <td class="text-center">{{ product.price }}</td>
-          <td class="text-center">{{ product.quantity }}</td>
-          <td
-            *ngIf="user?.role === 'superadmin' ||user?.role === 'admin' || user?.role === 'employee'"
-            class="text-center"
-          >
-            {{ product.sku}}
-          </td>
-          <td class="text-center">{{ product.manufacturer}}</td>
-          <td class="text-center">{{ product.mfgOn}}</td>
-          <td class="text-center">{{ product.expiryDate}}</td>
-          <td
+          </ng-container>
+        </th>
+        <td mat-cell *matCellDef="let product" class="text-center">
+          <ng-container
             *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
-            class="text-center"
           >
             <span
-              class="badge bg-{{ product.isActive ? 'success' : 'danger' }}"
-              class="text-center"
+              [ngClass]="product.isActive ? 'bg-success' : 'bg-danger'"
+              class="badge"
             >
               {{ product.isActive ? 'Yes' : 'No' }}
             </span>
-          </td>
-          <td class="d-flex justify-content-center align-items-center">
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+        <td
+          mat-cell
+          *matCellDef="let product"
+          class="text-center"
+          style="flex-wrap: nowrap; gap: 8px"
+        >
+          <!-- Admin buttons -->
+          <ng-container
+            *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
+          >
             <button
-              *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
-              class="btn btn-sm btn-success me-2"
+              mat-icon-button
+              color="primary"
               (click)="openQuantityModal(product)"
             >
-              <strong><i class="bi bi-plus-lg"></i></strong>
+              <mat-icon>add</mat-icon>
             </button>
             <button
-              *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
-              class="btn btn-sm btn-primary me-2"
+              mat-icon-button
+              color="primary"
               (click)="openModal(product)"
             >
-              <i class="bi bi-pencil-fill"></i>
+              <mat-icon>edit</mat-icon>
             </button>
             <button
-              *ngIf="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee'"
-              class="btn btn-sm btn-danger"
+              mat-icon-button
+              color="warn"
               (click)="deleteProduct(product.productId)"
             >
-              <i class="bi bi-trash3-fill"></i>
+              <mat-icon>delete</mat-icon>
             </button>
+          </ng-container>
+
+          <!-- Customer buttons -->
+          <ng-container *ngIf="user?.role === 'customer'">
             <button
-              *ngIf="user?.role === 'customer' && product.isActive; else outOfStock"
-              class="btn btn-sm btn-primary"
+              mat-icon-button
+              color="primary"
+              *ngIf="product.isActive"
               (click)="openQuantityModal(product)"
             >
-              Place Order
+              <mat-icon>shopping_cart</mat-icon>
             </button>
+            <button
+              mat-icon-button
+              color="warn"
+              *ngIf="!product.isActive"
+              disabled
+            >
+              <mat-icon>block</mat-icon>
+            </button>
+          </ng-container>
+        </td>
+      </ng-container>
 
-            <ng-template #outOfStock>
-              <button
-                *ngIf="user?.role === 'customer'"
-                class="btn btn-sm btn-danger"
-                disabled
-              >
-                Unavailable
-              </button>
-            </ng-template>
-          </td>
-        </tr>
-        <tr *ngIf="products.length === 0">
-          <td
-            [attr.colspan]="user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'employee' ? 11 : 9"
-            class="text-center"
-          >
-            No products found.
-          </td>
-        </tr>
-      </tbody>
+      <!-- Header and Row Declarations -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- No Products Found -->
+      <tr *ngIf="products.length === 0">
+        <td [attr.colspan]="displayedColumns.length" class="text-center">
+          No products found.
+        </td>
+      </tr>
     </table>
   </div>
 
-  <!-- Pagination -->
-  <nav
-    *ngIf="totalRecords > pageSize"
-    class="d-flex justify-content-center mt-3"
-  >
-    <ul class="pagination">
-      <li class="page-item" [class.disabled]="page === 1">
-        <button
-          class="page-link"
-          (click)="onPageChange(page - 1)"
-          [disabled]="page === 1"
-        >
-          Prev
-        </button>
-      </li>
+  <!-- Pagination Controls -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <!-- Rows per page input -->
+    <div class="d-flex align-items-center gap-2">
+      <label>Rows per page:</label>
+      <input
+        type="number"
+        min="1"
+        [(ngModel)]="pageSizeInput"
+        (keyup.enter)="onPageSizeChange()"
+        (blur)="onPageSizeChange()"
+        class="form-control"
+        style="width: 80px"
+      />
+    </div>
 
-      <li class="page-item" *ngFor="let p of pages" [class.active]="page === p">
-        <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
-      </li>
-
-      <li class="page-item" [class.disabled]="page === pages.length">
-        <button
-          class="page-link"
-          (click)="onPageChange(page + 1)"
-          [disabled]="page === pages.length"
-        >
-          Next
-        </button>
-      </li>
-    </ul>
-  </nav>
+    <!-- Page navigation -->
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-sm btn-outline-primary"
+        (click)="onPageChange(page - 1)"
+        [disabled]="page === 1"
+      >
+        Prev
+      </button>
+      <input
+        type="number"
+        min="1"
+        [max]="Math.ceil(totalRecords / pageSize)"
+        [(ngModel)]="inputPage"
+        (keyup.enter)="goToPage()"
+        (blur)="goToPage()"
+        class="form-control"
+        style="width: 60px"
+      />
+      / {{ Math.ceil(totalRecords / pageSize) }}
+      <button
+        class="btn btn-sm btn-outline-primary"
+        (click)="onPageChange(page + 1)"
+        [disabled]="page === Math.ceil(totalRecords / pageSize)"
+      >
+        Next
+      </button>
+    </div>
+  </div>
 </div>
 
 <div

@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormsModule,
+} from '@angular/forms';
 import { User } from '../../models/User';
 import { User as UserService } from '../../services/user';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -8,10 +13,30 @@ import { CustomToastService } from '../../services/toastr';
 import { Confirm } from '../confirm/confirm';
 import { finalize } from 'rxjs';
 
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
 @Component({
   selector: 'app-users',
   templateUrl: './users.html',
-  imports: [ReactiveFormsModule, CommonModule, Confirm],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule, // for ngModel
+    Confirm,
+    // Material modules
+    MatTableModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
 })
 export class Users implements OnInit {
   users: User[] = [];
@@ -27,8 +52,21 @@ export class Users implements OnInit {
   // Page variables
   page: number = 1;
   pageSize: number = 5;
+  pageSizeInput: number = this.pageSize;
   totalRecords: number = 0;
-  pages: number[] = [];
+  pageSizeOptions = [5, 10, 20, 50];
+  inputPage = 1;
+
+  displayedColumns: string[] = [
+    'index',
+    'firstName',
+    'lastName',
+    'email',
+    'role',
+    'isActive',
+    'isVerified',
+    'actions',
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -58,8 +96,7 @@ export class Users implements OnInit {
       .subscribe({
         next: (res) => {
           this.users = res.data.map((user: any) => ({ ...user, password: '' }));
-          this.totalRecords = res.totalRecords;
-          this.updatePages();
+          this.totalRecords = res.totalRecords; // ✅ now only store totalRecords
         },
         error: () => {
           this.toast.showToast('Error', 'Failed to fetch users', 'error', 3000);
@@ -67,16 +104,36 @@ export class Users implements OnInit {
       });
   }
 
-  updatePages() {
-    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
-    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  get totalPages(): number {
+    return Math.ceil(this.totalRecords / this.pageSize) || 1;
   }
 
   onPageChange(newPage: number) {
-    if (newPage >= 1 && newPage <= this.pages.length) {
+    if (newPage >= 1 && newPage <= this.totalPages) {
       this.page = newPage;
       this.loadUsers();
     }
+  }
+
+  goToPage(p: number) {
+    if (p < 1) p = 1;
+    if (p > this.totalPages) p = this.totalPages;
+    this.page = p;
+    this.loadUsers();
+  }
+
+  onPageSizeChange() {
+    // Ensure minimum page size
+    if (this.pageSizeInput < 1) this.pageSizeInput = 1;
+
+    // Update page size
+    this.pageSize = this.pageSizeInput;
+
+    // Reset to first page
+    this.page = 1;
+
+    // Reload users
+    this.loadUsers();
   }
 
   openModal(user?: User) {

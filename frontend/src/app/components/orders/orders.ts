@@ -18,29 +18,47 @@ import { SalesOrder } from '../../models/SalesOrder';
 // Custom component imports
 import { Confirm } from '../confirm/confirm';
 
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
 @Component({
   selector: 'app-orders',
   templateUrl: './orders.html',
   styleUrls: ['./orders.css'],
-  imports: [Confirm, CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [
+    Confirm,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
 })
 export class Orders implements OnInit {
   // Variables to store data
   user: any;
+  Math = Math;
   customers: any[] = [];
   products: Product[] = [];
   salesOrders: SalesOrder[] = [];
   deleteOrderId: number | null = null;
   selectedOrder: SalesOrder | null = null;
-  
+
   // Form group
   productForm!: FormGroup;
 
   // Message variables
   modalTitle = 'Create Sales Order';
   confirmMessage = '';
-  
-  
+
   // Loading flags
   isDeleting = false;
   showConfirm = false;
@@ -54,8 +72,18 @@ export class Orders implements OnInit {
   // Page variables
   page: number = 1;
   pageSize: number = 5;
+  pageSizeInput: number = this.pageSize;
+  inputPage: number = 1; // for custom page number input
   totalRecords: number = 0;
-  pages: number[] = [];
+  displayedColumns: string[] = [
+    'index',
+    'orderName',
+    'customerName',
+    'productName',
+    'quantity',
+    'status',
+    'actions',
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -150,7 +178,6 @@ export class Orders implements OnInit {
             lastUpdatedOn: order.lastUpdatedOn,
           }));
           this.totalRecords = res.totalRecords;
-          this.updatePages();
 
           if (this.user?.role === 'customer') {
             this.salesOrders = mappedOrders.filter(
@@ -171,18 +198,29 @@ export class Orders implements OnInit {
       });
   }
 
-  // Update pages when navigating to different page number
-  updatePages() {
+  // Page change buttons
+  onPageChange(newPage: number) {
+    if (newPage < 1) return;
     const totalPages = Math.ceil(this.totalRecords / this.pageSize);
-    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (newPage > totalPages) return;
+    this.page = newPage;
+    this.inputPage = newPage;
+    this.fetchSalesOrders();
   }
 
-  // Trigger refetch on changing page number
-  onPageChange(newPage: number) {
-    if (newPage >= 1 && newPage <= this.pages.length) {
-      this.page = newPage;
-      this.fetchSalesOrders();
-    }
+  // Custom page number input
+  goToPage() {
+    const page = Math.floor(this.inputPage);
+    this.onPageChange(page);
+  }
+
+  // Custom page size input
+  onPageSizeChange() {
+    if (this.pageSizeInput < 1) this.pageSizeInput = 1;
+    this.pageSize = this.pageSizeInput;
+    this.page = 1;
+    this.inputPage = 1;
+    this.fetchSalesOrders();
   }
 
   // Modal control function. Used to open modal and show modal header based on the Create or Edit button

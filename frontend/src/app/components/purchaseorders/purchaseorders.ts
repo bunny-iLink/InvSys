@@ -10,11 +10,29 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CustomToastService } from '../../services/toastr';
 import { finalize } from 'rxjs';
 
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
 @Component({
   selector: 'app-purchaseorders',
   templateUrl: './purchaseorders.html',
   styleUrls: ['./purchaseorders.css'],
-  imports: [Confirm, CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [
+    Confirm,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
 })
 export class Purchaseorders implements OnInit {
   products: Product[] = [];
@@ -39,10 +57,20 @@ export class Purchaseorders implements OnInit {
   // Page variables
   page: number = 1;
   pageSize: number = 5;
+  pageSizeInput: number = this.pageSize;
+  inputPage: number = 1; // for custom page number input
   totalRecords: number = 0;
-  pages: number[] = [];
+  displayedColumns: string[] = [
+    'index',
+    'orderName',
+    'productName',
+    'quantity',
+    'status',
+    'actions',
+  ];
 
   user: any;
+  Math = Math;
 
   constructor(
     private fb: FormBuilder,
@@ -99,7 +127,6 @@ export class Purchaseorders implements OnInit {
         next: (res: any) => {
           this.purchaseOrders = res.data;
           this.totalRecords = res.totalRecords;
-          this.updatePages();
         },
         error: () => {
           this.toastService.showToast(
@@ -112,16 +139,29 @@ export class Purchaseorders implements OnInit {
       });
   }
 
-  updatePages() {
+  // Page change buttons
+  onPageChange(newPage: number) {
+    if (newPage < 1) return;
     const totalPages = Math.ceil(this.totalRecords / this.pageSize);
-    this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (newPage > totalPages) return;
+    this.page = newPage;
+    this.inputPage = newPage;
+    this.fetchPurchaseOrders();
   }
 
-  onPageChange(newPage: number) {
-    if (newPage >= 1 && newPage <= this.pages.length) {
-      this.page = newPage;
-      this.fetchPurchaseOrders();
-    }
+  // Custom page number input
+  goToPage() {
+    const page = Math.floor(this.inputPage);
+    this.onPageChange(page);
+  }
+
+  // Custom page size input
+  onPageSizeChange() {
+    if (this.pageSizeInput < 1) this.pageSizeInput = 1;
+    this.pageSize = this.pageSizeInput;
+    this.page = 1;
+    this.inputPage = 1;
+    this.fetchPurchaseOrders();
   }
 
   openModal(order: PurchaseOrder | null = null) {
