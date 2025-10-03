@@ -12,8 +12,19 @@ export class PurchaseOrderService {
   constructor(private http: HttpClient) {}
 
   // Function to retrieve all the orders placed by inventory
-  getAllOrders(pageNumber: number, pageSize: number) {
-    return this.http.get(`${this.apiUrl}/order/purchaseorder/getAllOrders?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+  getAllOrders(
+    pageNumber: number,
+    pageSize: number,
+    orderId?: number
+  ): Observable<any> {
+    let url = `${this.apiUrl}/order/purchaseorder/getAllOrders?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+
+    // Only append orderId if it exists
+    if (orderId !== undefined) {
+      url += `&orderId=${orderId}`;
+    }
+
+    return this.http.get(url);
   }
 
   // Function to create a new order of a product to restock the inventory
@@ -31,6 +42,8 @@ export class PurchaseOrderService {
 
   // Delete an order placed by the inventory based on the ID
   deletePurchaseOrder(orderId: any): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/order/purchaseorder/deleteorder/${orderId}`);
+    return this.http.delete(
+      `${this.apiUrl}/order/purchaseorder/deleteorder/${orderId}`
+    );
   }
 }

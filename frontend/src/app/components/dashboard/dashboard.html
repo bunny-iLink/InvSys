@@ -123,7 +123,11 @@
 
       <!-- Summary Cards -->
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4 d-flex">
+        <div
+          class="col-12 col-md-4 d-flex"
+          style="cursor: pointer"
+          (click)="navigateToLowStock()"
+        >
           <div class="card shadow-sm w-100 d-flex flex-column">
             <div class="card-body d-flex flex-column justify-content-between">
               <h6 class="text-muted mb-3">Low Stock Products</h6>
@@ -224,8 +228,14 @@
             </thead>
             <tbody>
               <tr *ngFor="let order of recentSalesOrders">
-                <td>{{order.orderName}}</td>
-                <!-- <td>{{order.customerName}}</td> -->
+                <td>
+                  <button
+                    class="btn btn-link p-0"
+                    (click)="onSalesOrderClick(order.salesOrdersId)"
+                  >
+                    {{ order.orderName }}
+                  </button>
+                </td>
                 <td>{{order.productName}}</td>
                 <td>{{order.quantity}}</td>
                 <td>{{order.status}}</td>
@@ -256,7 +266,14 @@
             </thead>
             <tbody>
               <tr *ngFor="let po of recentPurchaseOrders">
-                <td>{{po.orderName}}</td>
+                <td>
+                  <button
+                    class="btn btn-link p-0"
+                    (click)="onPurchaseOrderClick(po.purchaseOrderId)"
+                  >
+                    {{ po.orderName }}
+                  </button>
+                </td>
                 <td>{{po.productName}}</td>
                 <td>{{po.quantity}}</td>
                 <td>{{po.status}}</td>

@@ -12,8 +12,18 @@ export class SalesOrderService {
   constructor(private http: HttpClient) {}
 
   // Function to fetch all the orders placed by customers
-  getAllOrders(pageNumber: number, pageSize: number) {
-    return this.http.get(`${this.apiUrl}/order/salesorder/getAllOrders?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+  getAllOrders(
+    pageNumber: number,
+    pageSize: number,
+    orderId?: number
+  ): Observable<any> {
+    let url = `${this.apiUrl}/order/salesorder/getAllOrders?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+
+    // Only append orderId if it exists
+    if (orderId !== undefined) {
+      url += `&orderId=${orderId}`;
+    }
+    return this.http.get(url);
   }
 
   // Function to create an order placed by a customer
@@ -31,6 +41,8 @@ export class SalesOrderService {
 
   // Function to delete an order placed by a customer
   deleteSalesOrder(orderId: any): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/order/salesorder/deleteorder/${orderId}`);
+    return this.http.delete(
+      `${this.apiUrl}/order/salesorder/deleteorder/${orderId}`
+    );
   }
 }

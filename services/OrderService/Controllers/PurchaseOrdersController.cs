@@ -30,11 +30,22 @@ namespace OrderService.Controllers
         /// Returns an empty list if no purchase orders exist.
         /// </returns>
         [HttpGet("getAllOrders")]
-        public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 10, int? orderId = null)
         {
-            var totalRecords = await _context.PurchaseOrders.CountAsync();
+            var query = _context.PurchaseOrders.AsQueryable();
 
-            var orders = await _context.PurchaseOrders.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            // Apply filter if orderId is provided
+            if (orderId.HasValue)
+            {
+                query = query.Where(o => o.PurchaseOrderId == orderId.Value);
+            }
+
+            var totalRecords = await query.CountAsync();
+
+            var orders = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             return Ok(new
             {
@@ -44,6 +55,7 @@ namespace OrderService.Controllers
                 PageSize = pageSize
             });
         }
+
 
         /// <summary>
         /// Creates a new purchase order in the database.

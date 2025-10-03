@@ -30,13 +30,24 @@ namespace OrderService.Controllers
         /// Returns an empty list if no sales orders exist.
         /// </returns>
         [HttpGet("getAllOrders")]
-        public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 10, int? orderId = null)
         {
-            var totalRecords = await _context.SalesOrders.CountAsync();
+            // Start with all orders
+            var query = _context.SalesOrders.AsQueryable();
 
-            var orders = await _context.SalesOrders.Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+            // Filter by orderId if provided
+            if (orderId.HasValue)
+            {
+                query = query.Where(o => o.SalesOrdersId == orderId.Value);
+            }
+
+            var totalRecords = await query.CountAsync();
+
+            var orders = await query
+                .OrderBy(o => o.SalesOrdersId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             return Ok(new
             {
@@ -46,6 +57,7 @@ namespace OrderService.Controllers
                 PageSize = pageSize
             });
         }
+
 
         /// <summary>
         /// Creates a new sales order in the database.

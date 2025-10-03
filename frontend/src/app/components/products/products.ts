@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 // Model imports
 import { User } from '../../models/User';
@@ -95,7 +96,8 @@ export class Products implements OnInit {
     private productService: ProductService,
     private categoryService: CategoryService,
     private purchaseOrderService: PurchaseOrderService,
-    private salesOrderService: SalesOrderService
+    private salesOrderService: SalesOrderService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -152,8 +154,10 @@ export class Products implements OnInit {
   // Load all products page by page
   loadProducts() {
     this.isProductsLoading = true;
+    const query = this.route.snapshot.queryParamMap.get('lowStock');
+
     this.productService
-      .getAllProducts(this.page, this.pageSize)
+      .getAllProducts(this.page, this.pageSize, query ? true : false)
       .pipe(finalize(() => (this.isProductsLoading = false)))
       .subscribe({
         next: (res) => {

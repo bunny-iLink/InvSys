@@ -23,11 +23,22 @@ namespace ProductService.Controllers
         /// <param name="pageSize">Number of items per page (default = 10)</param>
         /// <returns>A paginated list of products.</returns>
         [HttpGet("getAllProducts")]
-        public async Task<IActionResult> GetAllProducts(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllProducts(
+    int pageNumber = 1,
+    int pageSize = 10,
+    bool lowStock = false) // <-- added query parameter
         {
-            var totalRecords = await _context.Products.CountAsync();
+            var query = _context.Products.AsQueryable();
 
-            var products = await _context.Products
+            // Apply lowStock filter if requested
+            if (lowStock)
+            {
+                query = query.Where(p => p.Quantity < p.MinStockLevel);
+            }
+
+            var totalRecords = await query.CountAsync();
+
+            var products = await query
                 .OrderBy(p => p.ProductId)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)

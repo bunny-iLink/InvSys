@@ -128,9 +128,10 @@ export class Dashboard implements OnInit {
 
   // Retrieves recent purchases made by the inventory
   getRecentPurchaseOrders() {
-    this.dashboardService
-      .getRecentPurchaseOrders()
-      .subscribe((data) => (this.recentPurchaseOrders = data));
+    this.dashboardService.getRecentPurchaseOrders().subscribe((data) => {
+      this.recentPurchaseOrders = data;
+      console.log(this.recentPurchaseOrders);
+    });
   }
 
   // Retrieves the number of orders placed by a customer and their status
@@ -245,5 +246,23 @@ export class Dashboard implements OnInit {
     this.loadMonthlySalesChart();
     this.loadCategoryPercentages();
     this.loadMonthlyPurchasesChart();
+  }
+
+  navigateToLowStock() {
+    this.router.navigate(['admin/products'], {
+      queryParams: { lowStock: true },
+    });
+  }
+
+  onPurchaseOrderClick(orderId: number) {
+    this.router.navigate(['admin/purchaseorders'], {
+      queryParams: { orderId: orderId },
+    });
+  }
+
+  onSalesOrderClick(orderId: number) {
+    this.router.navigate(['admin/sales'], {
+      queryParams: { orderId: orderId },
+    });
   }
 }

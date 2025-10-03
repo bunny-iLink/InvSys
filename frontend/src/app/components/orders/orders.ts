@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 // Service imports
 import { User as UserService } from '../../services/user';
@@ -90,7 +91,8 @@ export class Orders implements OnInit {
     private salesOrderService: SalesOrderService,
     private productService: ProductService,
     private userService: UserService,
-    private toastService: CustomToastService
+    private toastService: CustomToastService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -158,8 +160,11 @@ export class Orders implements OnInit {
   // Fetch sales data
   fetchSalesOrders() {
     this.isOrdersLoading = true;
+    const query = this.route.snapshot.queryParamMap.get('orderId');
+    const orderId = query ? parseInt(query, 10) : undefined;
+
     this.salesOrderService
-      .getAllOrders(this.page, this.pageSize)
+      .getAllOrders(this.page, this.pageSize, orderId)
       .pipe(finalize(() => (this.isOrdersLoading = false)))
       .subscribe({
         next: (res: any) => {

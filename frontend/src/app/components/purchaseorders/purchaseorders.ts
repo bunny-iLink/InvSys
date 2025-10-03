@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CustomToastService } from '../../services/toastr';
 import { finalize } from 'rxjs';
-
+import { ActivatedRoute } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
@@ -76,7 +76,8 @@ export class Purchaseorders implements OnInit {
     private fb: FormBuilder,
     private purchaseOrderService: PurchaseOrderService,
     private productService: ProductService,
-    private toastService: CustomToastService
+    private toastService: CustomToastService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -120,8 +121,13 @@ export class Purchaseorders implements OnInit {
   // Fetch purchase orders
   fetchPurchaseOrders() {
     this.isOrdersLoading = true;
+
+    // Get query param as string
+    const query = this.route.snapshot.queryParamMap.get('orderId');
+    const orderId = query ? parseInt(query, 10) : undefined;
+
     this.purchaseOrderService
-      .getAllOrders(this.page, this.pageSize)
+      .getAllOrders(this.page, this.pageSize, orderId)
       .pipe(finalize(() => (this.isOrdersLoading = false)))
       .subscribe({
         next: (res: any) => {

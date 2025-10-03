@@ -24,9 +24,9 @@ export class Product {
   }
 
   // Fetch data of all the products
-  getAllProducts(pageNumber: number, pageSize: number): Observable<any> {
+  getAllProducts(pageNumber: number, pageSize: number, query: boolean): Observable<any> {
     return this.http.get<any>(
-      `${this.apiUrl}/product/getAllProducts?pageNumber=${pageNumber}&pageSize=${pageSize}`
+      `${this.apiUrl}/product/getAllProducts?pageNumber=${pageNumber}&pageSize=${pageSize}&lowStock=${query}`
     );
   }
 
