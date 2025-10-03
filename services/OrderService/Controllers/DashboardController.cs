@@ -194,5 +194,53 @@ namespace OrderService.Controllers
                 orderedCount
             });
         }
+
+        [HttpGet("inventory/monthly-purchases")]
+        public async Task<IActionResult> GetMonthlyPurchases()
+        {
+            var sales = await _context.PurchaseOrders
+                .GroupBy(o => o.CreatedOn.Month)
+                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var result = new List<Dictionary<string, int>>();
+
+            var monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames;
+
+            for (int i = 1; i <= 12; i++)
+            {
+                var monthData = sales.FirstOrDefault(s => s.Month == i);
+                result.Add(new Dictionary<string, int>
+            {
+                { monthNames[i - 1], monthData?.Count ?? 0 }
+            });
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("inventory/monthly-sales")]
+        public async Task<IActionResult> GetMonthlySales()
+        {
+            var sales = await _context.SalesOrders
+                .GroupBy(o => o.CreatedOn.Month)
+                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var result = new List<Dictionary<string, int>>();
+
+            var monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames;
+
+            for (int i = 1; i <= 12; i++)
+            {
+                var monthData = sales.FirstOrDefault(s => s.Month == i);
+                result.Add(new Dictionary<string, int>
+            {
+                { monthNames[i - 1], monthData?.Count ?? 0 }
+            });
+            }
+
+            return Ok(result);
+        }
     }
 }

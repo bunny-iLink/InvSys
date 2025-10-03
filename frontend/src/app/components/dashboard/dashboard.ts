@@ -5,12 +5,14 @@ import { Router } from '@angular/router';
 
 // Service imports
 import { Dashboard as DashboardService } from '../../services/dashboard';
+import { title } from 'process';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  imports: [CommonModule],
+  imports: [CommonModule, NgxEchartsModule],
 })
 export class Dashboard implements OnInit {
   // Variables to store data
@@ -20,7 +22,7 @@ export class Dashboard implements OnInit {
   recentSalesOrders: any[] = [];
   recentPurchaseOrders: any[] = [];
   orderCounts = { ordered: 0, confirmed: 0, dispatched: 0 };
-  
+
   // Counter variables
   productsCount = 0;
   lowProductsCount = 0;
@@ -29,10 +31,15 @@ export class Dashboard implements OnInit {
   currentMonthSalesOrdersPending = 0;
   currentMonthPurchaseOrdersPending = 0;
   userCardData = { customers: 0, admins: 0, superadmins: 0 };
-  
+
   // Flags
   isCustomerModalOpen = false;
-  
+
+  // Chart Variables
+  salesChartOptions: any;
+  purchaseChartOptions: any;
+  categoryChartOptions: any;
+
   constructor(
     private dashboardService: DashboardService,
     private router: Router
@@ -44,6 +51,7 @@ export class Dashboard implements OnInit {
     }
 
     // Fetch the dashboard data after component initializes
+    this.loadCharts();
     this.getUserCounts();
     this.getOrderCounts();
     this.getProductsCount();
@@ -115,7 +123,6 @@ export class Dashboard implements OnInit {
       .subscribe((data) => {
         this.recentUserOrders = data;
         console.log(this.recentUserOrders);
-        
       });
   }
 
@@ -149,5 +156,94 @@ export class Dashboard implements OnInit {
   closeModal() {
     this.isCustomerModalOpen = false;
     this.selectedOrder = null;
+  }
+
+  loadMonthlySalesChart() {
+    this.dashboardService.getMonthlySalesData().subscribe((data) => {
+      const months = data.map((d: any) => Object.keys(d)[0]);
+      const values = data.map((d: any) => Object.values(d)[0]);
+
+      this.salesChartOptions = {
+        title: { text: 'Monthly Sales' },
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: months },
+        yAxis: { type: 'value' },
+        series: [
+          {
+            data: values,
+            type: 'line',
+            smooth: false,
+          },
+        ],
+      };
+    });
+  }
+
+  loadMonthlyPurchasesChart() {
+    this.dashboardService.getMonthlyPurchasesData().subscribe((data) => {
+      const months = data.map((d: any) => Object.keys(d)[0]);
+      const values = data.map((d: any) => Object.values(d)[0]);
+
+      this.purchaseChartOptions = {
+        title: { text: 'Monthly Purchases' },
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: months },
+        yAxis: { type: 'value' },
+        series: [
+          {
+            data: values,
+            type: 'line',
+            smooth: false,
+          },
+        ],
+      };
+    });
+  }
+
+  loadCategoryPercentages() {
+    this.dashboardService.getCategoryPercentage().subscribe((data) => {
+      // Transform API response to pie chart format
+      const seriesData = data.map((item: any) => {
+        const category = Object.keys(item)[0];
+        const value = item[category];
+        return { name: category, value: value };
+      });
+
+      // Set chart options
+      this.categoryChartOptions = {
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c}%',
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+        },
+        series: [
+          {
+            name: 'Product Categories',
+            type: 'pie',
+            radius: '60%',
+            data: seriesData,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)',
+              },
+            },
+            label: {
+              formatter: '{b}: {d}%',
+            },
+          },
+        ],
+      };
+    });
+  }
+
+  loadCharts() {
+    this.loadMonthlySalesChart();
+    this.loadCategoryPercentages();
+    this.loadMonthlyPurchasesChart();
   }
 }

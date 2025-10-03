@@ -2,7 +2,7 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
-  importProvidersFrom
+  importProvidersFrom,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
@@ -20,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -43,7 +44,11 @@ export const appConfig: ApplicationConfig = {
       MatInputModule,
       MatSelectModule,
       MatIconModule,
-      MatButtonModule
+      MatButtonModule,
+
+      NgxEchartsModule.forRoot({
+        echarts: () => import('echarts'),
+      })
     ),
   ],
 };

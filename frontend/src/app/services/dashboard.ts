@@ -69,4 +69,22 @@ export class Dashboard {
       `${this.orderApiUrl}/order/dashboard/customer/tilesData/${userId}`
     );
   }
+
+  getMonthlySalesData(): Observable<any> {
+    return this.http.get(
+      `${this.orderApiUrl}/order/dashboard/inventory/monthly-sales`
+    );
+  }
+
+  getMonthlyPurchasesData(): Observable<any> {
+    return this.http.get(
+      `${this.orderApiUrl}/order/dashboard/inventory/monthly-purchases`
+    );
+  }
+
+  getCategoryPercentage(): Observable<any> {
+    return this.http.get(
+      `${this.productApiUrl}/dashboard/category-percentages`
+    );
+  }
 }
