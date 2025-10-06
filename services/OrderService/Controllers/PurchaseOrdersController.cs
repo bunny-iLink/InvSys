@@ -80,14 +80,20 @@ namespace OrderService.Controllers
             }
 
             purchaseOrder.PurchaseOrderId = 0; // Let DB auto-generate the ID
-            purchaseOrder.CreatedOn = DateTime.UtcNow;
-            purchaseOrder.LastUpdatedOn = DateTime.UtcNow;
+
+            // Get IST timezone
+            var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+            var istNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istTimeZone);
+
+            purchaseOrder.CreatedOn = istNow;
+            purchaseOrder.LastUpdatedOn = istNow;
 
             _context.Add(purchaseOrder);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Sales order created successfully", data = purchaseOrder });
         }
+
 
         /// <summary>
         /// Deletes a purchase order from the database by its unique identifier.
@@ -144,7 +150,11 @@ namespace OrderService.Controllers
             order.ProductName = purchaseOrder.ProductName;
             order.Quantity = purchaseOrder.Quantity;
             order.Status = purchaseOrder.Status;
-            order.LastUpdatedOn = DateTime.UtcNow;  // update timestamp
+
+            // Convert current time to IST
+            var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+            order.LastUpdatedOn = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istTimeZone);
+
             order.LastUpdatedBy = purchaseOrder.LastUpdatedBy;
 
             // Optional: update OrderName if allowed
@@ -170,5 +180,6 @@ namespace OrderService.Controllers
 
             return Ok(new { message = "Purchase order updated successfully", data = order });
         }
+
     }
 }

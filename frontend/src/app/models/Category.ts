@@ -5,4 +5,6 @@ export interface Category {
   isActive: boolean;
   createdBy: number;
   lastUpdatedBy: number;
+  createdOn: string; // ISO date string
+  lastUpdatedOn: string; // ISO date string
 }

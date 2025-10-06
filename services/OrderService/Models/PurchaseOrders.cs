@@ -18,6 +18,7 @@ namespace OrderService.Models
         public int CreatedBy { get; set; }
         public DateTime LastUpdatedOn { get; set; }
         public int LastUpdatedBy { get; set; }
+        public double Amount { get; set; }
 
     }
 }

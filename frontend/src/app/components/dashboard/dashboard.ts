@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 
 // Service imports
 import { Dashboard as DashboardService } from '../../services/dashboard';
-import { title } from 'process';
 import { NgxEchartsModule } from 'ngx-echarts';
 
 @Component({
@@ -33,7 +32,7 @@ export class Dashboard implements OnInit {
   userCardData = { customers: 0, admins: 0, superadmins: 0 };
 
   // Flags
-  isCustomerModalOpen = false;
+  isSalesOrderModalOpen = false;
 
   // Chart Variables
   salesChartOptions: any;
@@ -78,8 +77,6 @@ export class Dashboard implements OnInit {
   // Retrieves the current month sales orders
   getCurrentMonthSalesOrders() {
     this.dashboardService.getCurrentMonthSalesOrders().subscribe((data) => {
-      console.log(data);
-
       this.currentMonthSalesOrders = data.totalOrders;
       this.currentMonthSalesOrdersPending = data.orderedCount;
     });
@@ -88,8 +85,6 @@ export class Dashboard implements OnInit {
   // Retrieves current month purchases
   getCurrentMonthPurchaseOrders() {
     this.dashboardService.getCurrentMonthPurchaseOrders().subscribe((data) => {
-      console.log(data);
-
       this.currentMonthPurchaseOrders = data.totalOrders;
       this.currentMonthPurchaseOrdersPending = data.orderedCount;
     });
@@ -151,11 +146,11 @@ export class Dashboard implements OnInit {
       (order) => order.salesOrdersId === orderId
     );
 
-    this.isCustomerModalOpen = true;
+    this.isSalesOrderModalOpen = true;
   }
 
   closeModal() {
-    this.isCustomerModalOpen = false;
+    this.isSalesOrderModalOpen = false;
     this.selectedOrder = null;
   }
 
@@ -165,7 +160,7 @@ export class Dashboard implements OnInit {
       const values = data.map((d: any) => Object.values(d)[0]);
 
       this.salesChartOptions = {
-        title: { text: 'Monthly Sales' },
+        title: { text: 'Monthly Sales (in Rs.)' },
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: months },
         yAxis: { type: 'value' },
@@ -186,7 +181,7 @@ export class Dashboard implements OnInit {
       const values = data.map((d: any) => Object.values(d)[0]);
 
       this.purchaseChartOptions = {
-        title: { text: 'Monthly Purchases' },
+        title: { text: 'Monthly Purchases (in Rs.)' },
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: months },
         yAxis: { type: 'value' },

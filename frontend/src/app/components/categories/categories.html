@@ -22,12 +22,18 @@
 </div>
 
 <!-- Header Row. Holds the page name and Add Category button (to add/create) a new category -->
-<div class="d-flex align-items-center justify-content-between mb-3 mt-3" style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px);">
+<div
+  class="d-flex align-items-center justify-content-between mb-3 mt-3"
+  style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px)"
+>
   <h2 class="fw-bold text-dark mb-0">Category Management</h2>
   <button class="btn btn-success" (click)="openModal()">+ Add Category</button>
 </div>
 
-<div class="card shadow-sm p-4" style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px);">
+<div
+  class="card shadow-sm p-4"
+  style="margin-left: calc(1rem + 2px); margin-right: calc(1rem + 2px)"
+>
   <div class="table-responsive table-fixed-height">
     <table mat-table [dataSource]="categories" class="full-width-table">
       <!-- Index -->
@@ -50,16 +56,14 @@
 
       <!-- Status -->
       <ng-container matColumnDef="isActive">
-        <th mat-header-cell *matHeaderCellDef class="text-center">
-          Status
-        </th>
+        <th mat-header-cell *matHeaderCellDef class="text-center">Status</th>
         <td mat-cell *matCellDef="let category" class="text-center">
           <span
-              [ngClass]="category.isActive ? 'bg-success' : 'bg-danger'"
-              class="badge"
-            >
-              {{ category.isActive ? 'Yes' : 'No' }}
-            </span>
+            [ngClass]="category.isActive ? 'bg-success' : 'bg-danger'"
+            class="badge"
+          >
+            {{ category.isActive ? 'Yes' : 'No' }}
+          </span>
         </td>
       </ng-container>
 
@@ -70,6 +74,29 @@
         </th>
         <td mat-cell *matCellDef="let category" class="text-center">
           {{ category.createdByName }}
+        </td>
+      </ng-container>
+
+      <!-- Created On -->
+      <ng-container matColumnDef="createdOn">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          <div class="d-flex align-items-center justify-content-center">
+            <span>Created On</span>
+            <button
+              mat-icon-button
+              (click)="toggleSort('createdOn')"
+              aria-label="Sort Created On"
+            >
+              <mat-icon>
+                {{ sortColumn === 'createdOn' ? (sortDirection === 'asc' ?
+                'arrow_upward' : 'arrow_downward') : 'unfold_more' }}
+              </mat-icon>
+            </button>
+          </div>
+        </th>
+
+        <td mat-cell *matCellDef="let category" class="text-center">
+          {{ category.createdOn | date:'medium':'IST' }}
         </td>
       </ng-container>
 

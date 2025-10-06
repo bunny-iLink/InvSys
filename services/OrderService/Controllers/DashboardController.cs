@@ -199,20 +199,26 @@ namespace OrderService.Controllers
         public async Task<IActionResult> GetMonthlyPurchases()
         {
             var sales = await _context.PurchaseOrders
+                .Where(o => o.Status == "Confirmed" || o.Status == "Received")
                 .GroupBy(o => o.CreatedOn.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    TotalAmount = g.Sum(o => o.Amount)
+                })
                 .ToListAsync();
 
-            var result = new List<Dictionary<string, int>>();
+
+            var result = new List<Dictionary<string, double>>();
 
             var monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames;
 
             for (int i = 1; i <= 12; i++)
             {
                 var monthData = sales.FirstOrDefault(s => s.Month == i);
-                result.Add(new Dictionary<string, int>
+                result.Add(new Dictionary<string, double>
             {
-                { monthNames[i - 1], monthData?.Count ?? 0 }
+                { monthNames[i - 1], monthData?.TotalAmount ?? 0.00 }
             });
             }
 
@@ -223,20 +229,25 @@ namespace OrderService.Controllers
         public async Task<IActionResult> GetMonthlySales()
         {
             var sales = await _context.SalesOrders
+            .Where(o => o.Status == "Confirmed" || o.Status == "Dispatched")
                 .GroupBy(o => o.CreatedOn.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    TotalAmount = g.Sum(o => o.Amount)
+                })
                 .ToListAsync();
 
-            var result = new List<Dictionary<string, int>>();
+            var result = new List<Dictionary<string, double>>();
 
             var monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames;
 
             for (int i = 1; i <= 12; i++)
             {
                 var monthData = sales.FirstOrDefault(s => s.Month == i);
-                result.Add(new Dictionary<string, int>
+                result.Add(new Dictionary<string, double>
             {
-                { monthNames[i - 1], monthData?.Count ?? 0 }
+                { monthNames[i - 1], monthData?.TotalAmount ?? 0.00 }
             });
             }
 

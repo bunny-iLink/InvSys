@@ -3,7 +3,12 @@ import { finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormsModule,
+} from '@angular/forms';
 
 // Model imports
 import { User } from '../../models/User';
@@ -59,10 +64,15 @@ export class Categories implements OnInit {
     'index',
     'categoryName',
     'createdByName',
+    'createdOn',
     'lastUpdatedByName',
     'isActive',
     'actions',
   ];
+
+  // Sorting string
+  sortColumn: keyof Category = 'createdOn';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   // Display messages
   modalTitle: string = 'Add Category';
@@ -145,7 +155,7 @@ export class Categories implements OnInit {
                 : 'Unknown',
           }));
           console.log('Categories: ', this.categories);
-          
+
           this.totalRecords = res.totalRecords;
         },
         error: () => {
@@ -288,6 +298,57 @@ export class Categories implements OnInit {
   // Closes the Delete Category confirmation box if clicked "No"
   onCancelDelete() {
     this.resetConfirm();
+  }
+
+  toggleSort(column: keyof Category): void {
+    if (this.sortColumn === column) {
+      // Toggle direction
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column to sort
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.sortData();
+  }
+
+  sortData() {
+    this.categories = [...this.categories].sort((a, b) => {
+      const valueA = a[this.sortColumn];
+      const valueB = b[this.sortColumn];
+
+      // Only parse dates for date columns
+      if (
+        this.sortColumn === 'createdOn' ||
+        this.sortColumn === 'lastUpdatedOn'
+      ) {
+        const timeA = new Date(valueA as string).getTime();
+        const timeB = new Date(valueB as string).getTime();
+        return this.sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+
+      // String comparison
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return this.sortDirection === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      // Number comparison
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
+
+      // Boolean comparison (false < true)
+      if (typeof valueA === 'boolean' && typeof valueB === 'boolean') {
+        return this.sortDirection === 'asc'
+          ? Number(valueA) - Number(valueB)
+          : Number(valueB) - Number(valueA);
+      }
+
+      return 0; // fallback if types don't match
+    });
   }
 
   // Resets the variables for confirmation box

@@ -43,6 +43,10 @@ export class Purchaseorders implements OnInit {
   modalTitle = 'Create Purchase Order';
   selectedOrder: PurchaseOrder | null = null;
 
+  // Sorting string
+  sortColumn: keyof PurchaseOrder = 'createdOn';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   showConfirm = false;
   confirmMessage = '';
   deleteOrderId: number | null = null;
@@ -65,6 +69,7 @@ export class Purchaseorders implements OnInit {
     'orderName',
     'productName',
     'quantity',
+    'createdOn',
     'status',
     'actions',
   ];
@@ -202,16 +207,22 @@ export class Purchaseorders implements OnInit {
       (p) => p.productId === +this.productForm.value.productName
     );
 
+    const quantity = this.productForm.value.quantity;
+    const amount = product ? product.price * quantity : 0;
+
     const payload = {
       OrderName: `PO-${Date.now()}`,
       ProductId: this.productForm.value.productName,
       ProductName: product?.productName || '',
-      Quantity: this.productForm.value.quantity,
-      Status: 'Ordered',
-      CreatedBy: this.user?.userId || null,
-      CreatedOn: now,
+      Quantity: quantity,
+      Status: this.selectedOrder ? this.selectedOrder.status : 'Ordered',
+      CreatedBy: this.selectedOrder
+        ? this.selectedOrder.createdBy
+        : this.user?.userId || null,
+      CreatedOn: this.selectedOrder ? this.selectedOrder.createdOn : now,
       LastUpdatedBy: this.user?.userId || null,
       LastUpdatedOn: now,
+      Amount: amount,
     };
 
     const request$ = this.selectedOrder
@@ -258,6 +269,7 @@ export class Purchaseorders implements OnInit {
       createdOn: order.createdOn,
       lastUpdatedBy: this.user?.userId || null,
       lastUpdatedOn: new Date().toISOString(),
+      amount: order.amount,
     };
 
     this.purchaseOrderService
@@ -325,6 +337,57 @@ export class Purchaseorders implements OnInit {
   onCancelDelete() {
     this.showConfirm = false;
     this.deleteOrderId = null;
+  }
+
+  toggleSort(column: keyof PurchaseOrder): void {
+    if (this.sortColumn === column) {
+      // Toggle direction
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column to sort
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.sortData();
+  }
+
+  sortData() {
+    this.purchaseOrders = [...this.purchaseOrders].sort((a, b) => {
+      const valueA = a[this.sortColumn];
+      const valueB = b[this.sortColumn];
+
+      // Only parse dates for date columns
+      if (
+        this.sortColumn === 'createdOn' ||
+        this.sortColumn === 'lastUpdatedOn'
+      ) {
+        const timeA = new Date(valueA as string).getTime();
+        const timeB = new Date(valueB as string).getTime();
+        return this.sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+
+      // String comparison
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return this.sortDirection === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      // Number comparison
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
+
+      // Boolean comparison (false < true)
+      if (typeof valueA === 'boolean' && typeof valueB === 'boolean') {
+        return this.sortDirection === 'asc'
+          ? Number(valueA) - Number(valueB)
+          : Number(valueB) - Number(valueA);
+      }
+
+      return 0; // fallback if types don't match
+    });
   }
 
   // Global loading getter (optional)

@@ -73,6 +73,29 @@
         </td>
       </ng-container>
 
+      <!-- Created On -->
+      <ng-container matColumnDef="createdOn">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          <div class="d-flex align-items-center justify-content-center">
+            <span>Created On</span>
+            <button
+              mat-icon-button
+              (click)="toggleSort('createdOn')"
+              aria-label="Sort Created On"
+            >
+              <mat-icon>
+                {{ sortColumn === 'createdOn' ? (sortDirection === 'asc' ?
+                'arrow_upward' : 'arrow_downward') : 'unfold_more' }}
+              </mat-icon>
+            </button>
+          </div>
+        </th>
+
+        <td mat-cell *matCellDef="let order" class="text-center">
+          {{ order.createdOn | date:'medium':'Asia/Kolkata' }}
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef class="text-center">Status</th>
         <td mat-cell *matCellDef="let order; let i = index" class="text-center">

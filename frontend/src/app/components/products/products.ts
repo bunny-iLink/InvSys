@@ -50,6 +50,8 @@ export class Products implements OnInit {
   products: Product[] = [];
   selectedDeleteProduct: number = 0;
   selectedProduct: Product | null = null;
+  selectedProductDisplay: Product | null | undefined = null;
+  isViewProductModalOpen = false;
   Math = Math;
 
   // Page variables
@@ -64,17 +66,19 @@ export class Products implements OnInit {
     'category',
     'price',
     'quantity',
-    'sku',
-    'manufacturer',
-    'mfgOn',
-    'expiryDate',
+    'createdOn',
     'isActive',
+    'view',
     'actions',
   ];
 
   // Form group
   productForm!: FormGroup;
   quantityForm!: FormGroup;
+
+  // Sorting string
+  sortColumn: keyof Product = 'createdOn';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   // Message strings
   modalTitle: string = 'Add Product';
@@ -360,6 +364,7 @@ export class Products implements OnInit {
     if (!this.selectedProduct || this.quantityForm.invalid) return;
 
     this.isOrderSubmitting = true;
+
     const payload = {
       PurchaseOrderId: 0,
       OrderName: `PO-${Date.now()}`,
@@ -371,6 +376,8 @@ export class Products implements OnInit {
       CreatedBy: this.user?.userId || 0,
       LastUpdatedOn: new Date().toISOString(),
       LastUpdatedBy: this.user?.userId || 0,
+      Amount:
+        this.selectedProduct.price * this.quantityForm.value.orderQuantity,
     };
 
     this.purchaseOrderService
@@ -397,6 +404,7 @@ export class Products implements OnInit {
     if (!this.selectedProduct || this.quantityForm.invalid) return;
 
     this.isOrderSubmitting = true;
+
     const payload = {
       SalesOrderId: 0,
       OrderName: `SO-${Date.now()}`,
@@ -411,6 +419,8 @@ export class Products implements OnInit {
       CreatedBy: this.user?.userId || 0,
       LastUpdatedOn: new Date().toISOString(),
       LastUpdatedBy: this.user?.userId || 0,
+      Amount:
+        this.selectedProduct.price * this.quantityForm.value.orderQuantity,
     };
 
     this.salesOrderService
@@ -452,6 +462,71 @@ export class Products implements OnInit {
         categoryName: category.categoryName,
       });
     }
+  }
+
+  toggleSort(column: keyof Product): void {
+    if (this.sortColumn === column) {
+      // Toggle direction
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column to sort
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.sortData();
+  }
+
+  sortData() {
+    this.products = [...this.products].sort((a, b) => {
+      const valueA = a[this.sortColumn];
+      const valueB = b[this.sortColumn];
+
+      // Only parse dates for date columns
+      if (
+        this.sortColumn === 'createdOn' ||
+        this.sortColumn === 'lastUpdatedOn'
+      ) {
+        const timeA = new Date(valueA as string).getTime();
+        const timeB = new Date(valueB as string).getTime();
+        return this.sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+
+      // String comparison
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return this.sortDirection === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      // Number comparison
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
+
+      // Boolean comparison (false < true)
+      if (typeof valueA === 'boolean' && typeof valueB === 'boolean') {
+        return this.sortDirection === 'asc'
+          ? Number(valueA) - Number(valueB)
+          : Number(valueB) - Number(valueA);
+      }
+
+      return 0; // fallback if types don't match
+    });
+  }
+
+  openProductDisplayModal(passedProduct: Product) {
+    console.log('Passed Product:', passedProduct);
+    
+    this.selectedProductDisplay = this.products.find(
+      (product) => product.productId === passedProduct.productId
+    );
+    console.log('Selected Product for Display:', this.selectedProductDisplay);
+    this.isViewProductModalOpen = true;
+  }
+
+  closeProductDisplayModal() {
+    this.isViewProductModalOpen = false;
   }
 
   // Optional global isLoading getter

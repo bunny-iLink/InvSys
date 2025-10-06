@@ -152,8 +152,9 @@ namespace OrderService.Controllers
             order.Quantity = salesOrder.Quantity;
             order.Status = salesOrder.Status;
 
-            // Audit fields
-            order.LastUpdatedOn = DateTime.UtcNow;
+            // Audit fields in IST
+            var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+            order.LastUpdatedOn = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istTimeZone);
             order.LastUpdatedBy = salesOrder.LastUpdatedBy;
 
             // Save changes
@@ -177,5 +178,6 @@ namespace OrderService.Controllers
                 data = order
             });
         }
+
     }
 }

@@ -14,4 +14,6 @@ export interface Product {
     manufacturer: string | null;
     sku: string | null;
     minStockLevel: number | null;
+    createdOn?: string; 
+    lastUpdatedOn?: string | null; 
 }

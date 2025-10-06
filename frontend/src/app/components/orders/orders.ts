@@ -82,9 +82,14 @@ export class Orders implements OnInit {
     'customerName',
     'productName',
     'quantity',
+    'createdOn',
     'status',
     'actions',
   ];
+
+  // Sorting string
+  sortColumn: keyof SalesOrder = 'createdOn';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(
     private fb: FormBuilder,
@@ -92,7 +97,7 @@ export class Orders implements OnInit {
     private productService: ProductService,
     private userService: UserService,
     private toastService: CustomToastService,
-    private route: ActivatedRoute,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -266,6 +271,9 @@ export class Orders implements OnInit {
       (c) => c.userId === +this.productForm.value.customerId
     );
 
+    const quantity = this.productForm.value.quantity;
+    const amount = product ? product.price * quantity : 0;
+
     const payload: SalesOrder = {
       salesOrderId: this.selectedOrder?.salesOrderId || 0,
       orderName: this.selectedOrder
@@ -285,6 +293,7 @@ export class Orders implements OnInit {
       createdOn: this.selectedOrder ? this.selectedOrder.createdOn : now,
       lastUpdatedBy: this.user?.userId || 0,
       lastUpdatedOn: now,
+      amount: amount,
     };
 
     const request$ = this.selectedOrder
@@ -395,6 +404,57 @@ export class Orders implements OnInit {
   onCancelDelete() {
     this.showConfirm = false;
     this.deleteOrderId = null;
+  }
+
+  toggleSort(column: keyof SalesOrder): void {
+    if (this.sortColumn === column) {
+      // Toggle direction
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column to sort
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.sortData();
+  }
+
+  sortData() {
+    this.salesOrders = [...this.salesOrders].sort((a, b) => {
+      const valueA = a[this.sortColumn];
+      const valueB = b[this.sortColumn];
+
+      // Only parse dates for date columns
+      if (
+        this.sortColumn === 'createdOn' ||
+        this.sortColumn === 'lastUpdatedOn'
+      ) {
+        const timeA = new Date(valueA as string).getTime();
+        const timeB = new Date(valueB as string).getTime();
+        return this.sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+
+      // String comparison
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return this.sortDirection === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      // Number comparison
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
+
+      // Boolean comparison (false < true)
+      if (typeof valueA === 'boolean' && typeof valueB === 'boolean') {
+        return this.sortDirection === 'asc'
+          ? Number(valueA) - Number(valueB)
+          : Number(valueB) - Number(valueA);
+      }
+
+      return 0; // fallback if types don't match
+    });
   }
 
   // Optional global loading getter

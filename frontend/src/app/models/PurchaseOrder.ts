@@ -10,4 +10,5 @@ export interface PurchaseOrder {
   createdBy: number;
   lastUpdatedOn: string;
   lastUpdatedBy: number;
+  amount: number;
 }
