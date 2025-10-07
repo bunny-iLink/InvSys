@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { Guard } from './guard/guard';
 import { Layout } from './components/layout/layout';
 
 export const routes: Routes = [
@@ -40,6 +41,8 @@ export const routes: Routes = [
   {
     path: 'customer',
     component: Layout,
+    canActivateChild: [Guard],
+    data: { roles: ['customer'] },
     children: [
       {
         path: 'dashboard',
@@ -63,6 +66,8 @@ export const routes: Routes = [
   },
   {
     path: 'employee',
+    canActivateChild: [Guard],
+    data: { roles: ['employee'] },
     component: Layout,
     children: [
       {
@@ -96,6 +101,8 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: Layout,
+    canActivateChild: [Guard],
+    data: { roles: ['admin'] },
     children: [
       {
         path: 'dashboard',
@@ -141,6 +148,8 @@ export const routes: Routes = [
   },
   {
     path: 'superadmin',
+    canActivateChild: [Guard],
+    data: { roles: ['superadmin'] },
     component: Layout,
     children: [
       {
@@ -184,5 +193,13 @@ export const routes: Routes = [
           import('./components/orders/orders').then((m) => m.Orders),
       },
     ],
+  },
+  {
+    path: 'unauthorized',
+    loadComponent: () =>
+      import('./components/unauthorized/unauthorized').then(
+        (m) => m.Unauthorized
+      ),
+    title: 'Unauthorized | JobHunt Pro',
   },
 ];

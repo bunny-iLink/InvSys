@@ -60,4 +60,14 @@ export class Auth {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   }
+
+  getUser(): any {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+  getUserRole(): string | null {
+    const user = this.getUser();
+    return user ? user.role : null;
+  }
 }
